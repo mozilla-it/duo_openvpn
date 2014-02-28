@@ -11,6 +11,7 @@ import socket
 import sys
 import os
 import traceback
+import syslog
 import cPickle as pickle
 
 # If FAIL_OPEN is set to True, then authentication will succeed when
@@ -54,7 +55,8 @@ def init():
 	return auth_api, username, client_ipaddr, factor, passcode
 
 def log(msg):
-	print(msg)
+	msg = "Duo OpenVPN: %s" % msg
+	syslog.syslog(msg)
 
 def is_auth_cached(username):
 	global user_cache

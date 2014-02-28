@@ -12,6 +12,7 @@ Features
 - Auth caching.
 - Fail open (optional).
 - OTP and Push (use push as password for push, passcode:123456 as password for OTP, where 123456 is your OTP)
+- CEF support
 
 TODO
 ----

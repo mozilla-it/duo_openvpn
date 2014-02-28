@@ -11,6 +11,7 @@ import socket
 import sys
 import os
 import traceback
+import syslog
 import cPickle as pickle
 
 # If FAIL_OPEN is set to True, then authentication will succeed when
@@ -22,6 +23,7 @@ FAIL_OPEN=True
 # Use 0 to disable.
 USER_CACHE_TIME=60*60*24
 USER_CACHE_PATH="/var/tmp/vpn_user_cache.pickle"
+USE_CEF_LOG=True
 
 if os.path.isfile(USER_CACHE_PATH):
 	user_cache = pickle.load(open(USER_CACHE_PATH, "rb"))
@@ -54,7 +56,26 @@ def init():
 	return auth_api, username, client_ipaddr, factor, passcode
 
 def log(msg):
-	print(msg)
+	if USE_CEF_LOG:
+		msg = cef(msg)
+	syslog.openlog('duo_openvpn', 0, syslog.LOG_DAEMON)
+	syslog.syslog(syslog.LOG_INFO, msg)
+	syslog.closelog()
+
+def cef(title="DuoAPI", msg="", ext=""):
+	hostname = socket.gethostname()
+	cefmsg = 'CEF:{v}|{deviceVendor}|{deviceProduct}|{deviceVersion}|{signatureID}|{name}|{message}|{deviceSeverity}|{extension}'.format(
+					v='0',
+					deviceVendor='Mozilla',
+					deviceProduct='OpenVPN',
+					deviceVersion='1.0',
+					signatureID='0',
+					name=title,
+					message=msg,
+					deviceSeverity='5',
+					extension=ext+' dhost=' + hostname,
+				)
+	return cefmsg
 
 def is_auth_cached(username):
 	global user_cache

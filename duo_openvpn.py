@@ -24,6 +24,7 @@ FAIL_OPEN=True
 USER_CACHE_TIME=60*60*24
 USER_CACHE_PATH="/var/tmp/vpn_user_cache.pickle"
 USE_CEF_LOG=True
+USERNAME_HACK=True
 
 if os.path.isfile(USER_CACHE_PATH):
 	user_cache = pickle.load(open(USER_CACHE_PATH, "rb"))
@@ -122,7 +123,10 @@ def main():
 		return res
 
 	auth_api, username, client_ipaddr, factor, passcode = init()
-	username = clean_username(username)
+
+	if USERNAME_HACK:
+		username = clean_username(username)
+
 	try:
 		ping()
 		check()

@@ -149,7 +149,7 @@ def main():
 		log('User %s is known - authenticating' % username)
 
 		# Auth bypass for cached usernames
-		if is_auth_cached(username, client_ipadr):
+		if is_auth_cached(username, client_ipaddr):
 			log('User %s cached authentication success' % username)
 			return True
 

@@ -79,20 +79,24 @@ def cef(title="DuoAPI", msg="", ext=""):
 				)
 	return cefmsg
 
-def is_auth_cached(username):
+def is_auth_cached(username, client_ipaddr):
 	global user_cache
 	now = time.time()
 	if user_cache.has_key(username):
-		tleft = user_cache[username]
-		if tleft > now:
+		try:
+			tleft = user_cache[username]['timestamp']
+			ipaddr = user_cache[username]['ipaddr']
+		except:
+			return False
+		if client_ipaddr == ipaddr and tleft > now:
 			return True
 		del user_cache[username]
 	return False
 
-def add_auth_cache(username):
+def add_auth_cache(username, client_ipaddr):
 	global user_cache
 	now = time.time()
-	user_cache[username] = now+USER_CACHE_TIME
+	user_cache[username] = {'timestamp': now+USER_CACHE_TIME, 'ipaddr': client_ipaddr}
 	pickle.dump(user_cache, open(USER_CACHE_PATH, "wb"))
 
 def main():
@@ -145,7 +149,7 @@ def main():
 		log('User %s is known - authenticating' % username)
 
 		# Auth bypass for cached usernames
-		if is_auth_cached(username):
+		if is_auth_cached(username, client_ipadr):
 			log('User %s cached authentication success' % username)
 			return True
 
@@ -157,7 +161,7 @@ def main():
 
 		if res['result'] == 'allow':
 			log('User %s is now authenticated with DuoAPI using %s' % (username, factor))
-			add_auth_cache(username)
+			add_auth_cache(username, client_ipaddr)
 			return True
 
 		log('User %s authentication failed: %s' % (username, res['status_msg']))

@@ -8,12 +8,13 @@ Not very happy with the provided duo_openvpn support, we rewrote it to use duo_c
 Features
 --------
 
-- Simple.
+- Simple. Sort of.
 - Auth caching per login+ip address.
 - Fail open (optional).
 - OTP and Push (use push as password for push, passcode:123456 as password for OTP, where 123456 is your OTP).
 - CEF support.
 - Optional username hack, in case you use emails as certificate CN but only the first part of the email as login.
+- Supports logging with LDAP with or instead-of Duo.
 
 TODO
 ----

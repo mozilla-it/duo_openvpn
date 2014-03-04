@@ -103,7 +103,7 @@ class DuoAPIAuth:
 		else:
 			self.user_cache = {}
 
-	def fail_open():
+	def fail_open(self):
 		return self.failmode
 
 	def is_auth_cached(self):
@@ -155,43 +155,43 @@ class DuoAPIAuth:
 		return res
 
 	def auth(self):
-		try:
-			self.ping()
-			self.check()
-			auth = self.preauth()
-		except socket.error, s:
-			log('DuoAPI contact failed %s' % (s))
-			return self.fail_open()
-		
-		if auth == "allow":
-			return True
-		elif auth == "enroll":
-			log('User %s needs to enroll first' % self.username)
-			return False
-		elif auth == "auth":
-			log('User %s is known - authenticating' % self.username)
-
-			# Auth bypass for cached usernames
-			if self.is_auth_cached():
-				log('User %s cached authentication success' % self.username)
-				return True
-
 			try:
-				res = self.doauth()
+				self.ping()
+				self.check()
+				auth = self.preauth()
 			except socket.error, s:
 				log('DuoAPI contact failed %s' % (s))
 				return self.fail_open()
-
-			if res['result'] == 'allow':
-				log('User %s is now authenticated with DuoAPI using %s' % (self.username, self.factor))
-				self.add_auth_cache()
+			
+			if auth == "allow":
 				return True
+			elif auth == "enroll":
+				log('User %s needs to enroll first' % self.username)
+				return False
+			elif auth == "auth":
+				log('User %s is known - authenticating' % self.username)
 
-			log('User %s authentication failed: %s' % (self.username, res['status_msg']))
-			return False
-		else:
-			log('User %s is not allowed to authenticate' % self.username)
-			return False
+				# Auth bypass for cached usernames
+				if self.is_auth_cached():
+					log('User %s cached authentication success' % self.username)
+					return True
+
+				try:
+					res = self.doauth()
+				except socket.error, s:
+					log('DuoAPI contact failed %s' % (s))
+					return self.fail_open()
+
+				if res['result'] == 'allow':
+					log('User %s is now authenticated with DuoAPI using %s' % (self.username, self.factor))
+					self.add_auth_cache()
+					return True
+
+				log('User %s authentication failed: %s' % (self.username, res['status_msg']))
+				return False
+			else:
+				log('User %s is not allowed to authenticate' % self.username)
+				return False
 
 def main():
 	username = os.environ.get('common_name')

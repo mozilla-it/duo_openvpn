@@ -34,9 +34,18 @@ SKEY=''
 HOST=''
 
 # LDAP settings
-TRY_LDAP_AUTH=True
-LDAP_URL='ldap://127.0.0.1'
+# Auth/login
+TRY_LDAP_ONLY_AUTH_FIRST=False
+LDAP_URL="ldap://"
 LDAP_BIND_DN=''
+LDAP_BASE_DN=''
+
+LDAP_CONTROL_BIND_DN=""
+LDAP_CONTROL_PASSWORD=""
+LDAP_CONTROL_BASE_DN=""
+# Only this attr value can log
+LDAP_DUOSEC_ATTR_VALUE=""
+LDAP_DUOSEC_ATTR=""
 
 def log(msg):
 	if USE_CEF_LOG:
@@ -60,7 +69,27 @@ def cef(title="DuoAPI", msg="", ext=""):
 				)
 	return cefmsg
 
+
+def ldap_attr_get(url, binddn, password, basedn, value_filter, attr):
+	conn = ldap.initialize(url)
+	try:
+		conn.bind_s(binddn, password)
+	except ldap.LDAPError, e:
+		conn.unbind_s()
+		log('LDAP bind failed' % e)
+		return None
+
+	try:
+		res = conn.search_s(basedn, ldap.SCOPE_SUBTREE, value_filter, [attr])
+		#list of attributes
+		return res[0][1][attr]
+	except:
+		log('ldap_get_uid() filter search failed for %s=>%s' % (value_filter, attr))
+		return None
+
 def ldap_auth(username, password):
+	if (username == None) or (password == None): return False
+
 	try:
 		binddn = LDAP_BIND_DN % username
 	except:
@@ -155,43 +184,43 @@ class DuoAPIAuth:
 		return res
 
 	def auth(self):
+		try:
+			self.ping()
+			self.check()
+			auth = self.preauth()
+		except socket.error, s:
+			log('DuoAPI contact failed %s' % (s))
+			return self.fail_open()
+
+		if auth == "allow":
+			return True
+		elif auth == "enroll":
+			log('User %s needs to enroll first' % self.username)
+			return False
+		elif auth == "auth":
+			log('User %s is known - authenticating' % self.username)
+
+			# Auth bypass for cached usernames
+			if self.is_auth_cached():
+				log('User %s cached authentication success' % self.username)
+				return True
+
 			try:
-				self.ping()
-				self.check()
-				auth = self.preauth()
+				res = self.doauth()
 			except socket.error, s:
 				log('DuoAPI contact failed %s' % (s))
 				return self.fail_open()
-			
-			if auth == "allow":
+
+			if res['result'] == 'allow':
+				log('User %s is now authenticated with DuoAPI using %s' % (self.username, self.factor))
+				self.add_auth_cache()
 				return True
-			elif auth == "enroll":
-				log('User %s needs to enroll first' % self.username)
-				return False
-			elif auth == "auth":
-				log('User %s is known - authenticating' % self.username)
 
-				# Auth bypass for cached usernames
-				if self.is_auth_cached():
-					log('User %s cached authentication success' % self.username)
-					return True
-
-				try:
-					res = self.doauth()
-				except socket.error, s:
-					log('DuoAPI contact failed %s' % (s))
-					return self.fail_open()
-
-				if res['result'] == 'allow':
-					log('User %s is now authenticated with DuoAPI using %s' % (self.username, self.factor))
-					self.add_auth_cache()
-					return True
-
-				log('User %s authentication failed: %s' % (self.username, res['status_msg']))
-				return False
-			else:
-				log('User %s is not allowed to authenticate' % self.username)
-				return False
+			log('User %s authentication failed: %s' % (self.username, res['status_msg']))
+			return False
+		else:
+			log('User %s is not allowed to authenticate' % self.username)
+			return False
 
 def main():
 	username = os.environ.get('common_name')
@@ -224,7 +253,14 @@ def main():
 		factor = password
 		password = None
 
-	if TRY_LDAP_AUTH and password != None:
+# Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
+	if LDAP_CONTROL_BIND_DN != '' and password != None:
+		uid = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'uid')[0]
+		groups = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_CONTROL_BASE_DN, LDAP_DUOSEC_ATTR_VALUE, LDAP_DUOSEC_ATTR)
+		if uid not in groups:
+			return ldap_auth(username, password)
+
+	if TRY_LDAP_ONLY_AUTH_FIRST and password != None:
 # If this works, we bail here
 		if ldap_auth(username, password):
 			return True
@@ -232,6 +268,8 @@ def main():
 	if factor != None:
 		duo = DuoAPIAuth(IKEY, SKEY, HOST, username, client_ipaddr, factor, passcode, USERNAME_HACK, FAIL_OPEN, USER_CACHE_PATH, USER_CACHE_TIME)
 		return duo.auth()
+
+	return False
 
 if __name__ == "__main__":
 	if main():

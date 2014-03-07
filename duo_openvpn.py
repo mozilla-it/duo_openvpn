@@ -257,7 +257,7 @@ def main():
 	if LDAP_CONTROL_BIND_DN != '' and password != None:
 		uid = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'uid')[0]
 		groups = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_CONTROL_BASE_DN, LDAP_DUOSEC_ATTR_VALUE, LDAP_DUOSEC_ATTR)
-		if uid not in groups:
+		if (uid not in groups) and (username not in groups) and ((LDAP_BIND_DN % username) not in groups):
 			return ldap_auth(username, password)
 
 	if TRY_LDAP_ONLY_AUTH_FIRST and password != None:

@@ -88,7 +88,9 @@ def ldap_attr_get(url, binddn, password, basedn, value_filter, attr):
 		return None
 
 def ldap_auth(username, password):
-	if (username == None) or (password == None): return False
+	if (username == None) or (password == None):
+		log('User %s LDAP authentication failed' % username)
+		return False
 
 	try:
 		binddn = LDAP_BIND_DN % username
@@ -269,6 +271,7 @@ def main():
 		duo = DuoAPIAuth(IKEY, SKEY, HOST, username, client_ipaddr, factor, passcode, USERNAME_HACK, FAIL_OPEN, USER_CACHE_PATH, USER_CACHE_TIME)
 		return duo.auth()
 
+	log('User %s authentication failed' % username)
 	return False
 
 if __name__ == "__main__":

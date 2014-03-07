@@ -104,7 +104,7 @@ def ldap_auth(username, password):
 		return True
 	except ldap.LDAPError:
 		conn.unbind_s()
-		log('User %s LDAP authentication failed' % username)
+	log('User %s LDAP authentication failed' % username)
 	return False
 
 class DuoAPIAuth:
@@ -254,7 +254,7 @@ def main():
 		password = None
 
 # Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
-	if LDAP_CONTROL_BIND_DN != '' and password != None:
+	if LDAP_CONTROL_BIND_DN != '':
 		uid = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'uid')[0]
 		groups = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_CONTROL_BASE_DN, LDAP_DUOSEC_ATTR_VALUE, LDAP_DUOSEC_ATTR)
 		if (uid not in groups) and (username not in groups) and ((LDAP_BIND_DN % username) not in groups):

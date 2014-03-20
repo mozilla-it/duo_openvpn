@@ -183,7 +183,7 @@ class DuoAPIAuth:
 	def doauth(self):
 		if self.passcode:
 			res = self.auth_api.auth(username=self.username, factor=self.factor, ipaddr=self.client_ipaddr,
-								type="OpenVPN login", pushinfo="From%20server="+self.hostname, passcode=self.passcode)
+								passcode=self.passcode)
 		else:
 			res = self.auth_api.auth(username=self.username, factor=self.factor, ipaddr=self.client_ipaddr,
 								type="OpenVPN login", pushinfo="From%20server="+self.hostname, device="auto")

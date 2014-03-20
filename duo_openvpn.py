@@ -147,7 +147,7 @@ class DuoAPIAuth:
 				return False
 			if self.client_ipaddr == ipaddr and tleft > now:
 				return True
-			del self.ser_cache[self.username]
+			del self.user_cache[self.username]
 		return False
 
 	def add_auth_cache(self):

@@ -151,6 +151,9 @@ class DuoAPIAuth:
 		return False
 
 	def add_auth_cache(self):
+		# No IP? No cache for you.
+		if self.client_ipaddr == '0.0.0.0':
+			return
 		now = time.time()
 		self.user_cache[self.username] = {'timestamp': now+self.user_cache_time, 'ipaddr': self.client_ipaddr}
 		pickle.dump(self.user_cache, open(USER_CACHE_PATH, "wb"))
@@ -230,7 +233,7 @@ class DuoAPIAuth:
 
 def main():
 	username = os.environ.get('common_name')
-	client_ipaddr = os.environ.get('ipaddr', '0.0.0.0')
+	client_ipaddr = os.environ.get('untrusted_ip', '0.0.0.0')
 	password = os.environ.get('password', 'auto')
 	passcode = None
 	factor = None

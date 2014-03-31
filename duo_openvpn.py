@@ -69,10 +69,10 @@ def cef(title="DuoAPI", msg="", ext=""):
 	return cefmsg
 
 def ldap_get_dn(username):
-	dn = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'dn')[0]
+	dn = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'dn', True)
 	return dn
 
-def ldap_attr_get(url, binddn, password, basedn, value_filter, attr):
+def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=False):
 	conn = ldap.initialize(url)
 	try:
 		conn.bind_s(binddn, password)
@@ -84,9 +84,12 @@ def ldap_attr_get(url, binddn, password, basedn, value_filter, attr):
 	try:
 		res = conn.search_s(basedn, ldap.SCOPE_SUBTREE, value_filter, [attr])
 		#list of attributes
-		return res[0][1][attr]
+		if attr_key:
+			return res[0][0]
+		else:
+			return res[0][1][attr]
 	except:
-		log('ldap_get_uid() filter search failed for %s=>%s' % (value_filter, attr))
+		log('ldap_attr_get() filter search failed for %s=>%s (returning key? %s)' % (value_filter, attr, attr_key))
 		return None
 
 def ldap_auth(username, user_dn, password):
@@ -258,18 +261,18 @@ def main():
 		factor = password
 		password = None
 
-# Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
 	if LDAP_CONTROL_BIND_DN != '':
+		user_dn = ldap_get_dn(username)
+# Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
 		uid = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'uid')[0]
 		groups = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_CONTROL_BASE_DN, LDAP_DUOSEC_ATTR_VALUE, LDAP_DUOSEC_ATTR)
-		user_dn = ldap_get_dn(username)
 		if (uid not in groups) and (username not in groups) and (user_dn not in groups):
 			return ldap_auth(username, user_dn, password)
 
-	if TRY_LDAP_ONLY_AUTH_FIRST and password != None:
+		if TRY_LDAP_ONLY_AUTH_FIRST and password != None:
 # If this works, we bail here
-		if ldap_auth(username, password):
-			return True
+			if ldap_auth(username, password):
+				return True
 
 	if factor != None:
 		duo = DuoAPIAuth(IKEY, SKEY, HOST, username, client_ipaddr, factor, passcode, USERNAME_HACK, FAIL_OPEN, USER_CACHE_PATH, USER_CACHE_TIME)

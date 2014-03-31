@@ -15,6 +15,7 @@ import traceback
 import syslog
 import cPickle as pickle
 import ldap
+import mozdef
 
 # If FAIL_OPEN is set to True, then authentication will succeed when
 # communication with DuoAPI fails.
@@ -25,7 +26,9 @@ FAIL_OPEN=True
 # Use 0 to disable.
 USER_CACHE_TIME=60*60*24
 USER_CACHE_PATH="/var/tmp/vpn_user_cache.pickle"
-USE_CEF_LOG=True
+#cef, none, or mozdef
+LOG_METHOD='mozdef'
+MOZDEF_LOGGER='https://127.0.0.1:8080/events'
 USERNAME_HACK=True
 
 # Duo settings
@@ -47,11 +50,15 @@ LDAP_DUOSEC_ATTR_VALUE=""
 LDAP_DUOSEC_ATTR=""
 
 def log(msg):
-	if USE_CEF_LOG:
-		msg = cef(msg)
-	syslog.openlog('duo_openvpn', 0, syslog.LOG_DAEMON)
-	syslog.syslog(syslog.LOG_INFO, msg)
-	syslog.closelog()
+	if LOG_METHOD == 'mozdef':
+		mozmsg = mozdef.MozDefMsg(MOZDEF_URL, tags=['openvpn', 'duosecurity'])
+		mozmsg.send(msg)
+	else:
+		if LOG_METHOD == 'cef':
+			msg = cef(msg)
+		syslog.openlog('duo_openvpn', 0, syslog.LOG_DAEMON)
+		syslog.syslog(syslog.LOG_INFO, msg)
+		syslog.closelog()
 
 def cef(title="DuoAPI", msg="", ext=""):
 	hostname = socket.gethostname()

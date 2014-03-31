@@ -1,0 +1,6 @@
+[submodule "duo_client"]
+	path = duo_client
+	url = https://github.com/duosecurity/duo_client_python/
+[submodule "mozdef"]
+	path = mozdef
+	url = https://github.com/gdestuynder/mozdef_lib

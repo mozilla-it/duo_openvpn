@@ -37,7 +37,6 @@ HOST=''
 # Auth/login
 TRY_LDAP_ONLY_AUTH_FIRST=False
 LDAP_URL="ldap://"
-LDAP_BIND_DN=''
 LDAP_BASE_DN=''
 
 LDAP_CONTROL_BIND_DN=""
@@ -69,6 +68,9 @@ def cef(title="DuoAPI", msg="", ext=""):
 				)
 	return cefmsg
 
+def ldap_get_dn(username):
+	dn = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'dn')[0]
+	return dn
 
 def ldap_attr_get(url, binddn, password, basedn, value_filter, attr):
 	conn = ldap.initialize(url)
@@ -87,20 +89,14 @@ def ldap_attr_get(url, binddn, password, basedn, value_filter, attr):
 		log('ldap_get_uid() filter search failed for %s=>%s' % (value_filter, attr))
 		return None
 
-def ldap_auth(username, password):
-	if (username == None) or (password == None):
+def ldap_auth(username, user_dn, password):
+	if (username == None) or (password == None) or (user_dn == None):
 		log('User %s LDAP authentication failed' % username)
-		return False
-
-	try:
-		binddn = LDAP_BIND_DN % username
-	except:
-		log('Incorrect LDAP_BIND_DN variable')
 		return False
 
 	conn = ldap.initialize(LDAP_URL)
 	try:
-		conn.bind_s(binddn, password)
+		conn.bind_s(user_dn, password)
 		conn.unbind_s()
 		log('User %s successfully authenticated against LDAP' % username)
 		return True
@@ -266,8 +262,9 @@ def main():
 	if LDAP_CONTROL_BIND_DN != '':
 		uid = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'uid')[0]
 		groups = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_CONTROL_BASE_DN, LDAP_DUOSEC_ATTR_VALUE, LDAP_DUOSEC_ATTR)
-		if (uid not in groups) and (username not in groups) and ((LDAP_BIND_DN % username) not in groups):
-			return ldap_auth(username, password)
+		user_dn = ldap_get_dn(username)
+		if (uid not in groups) and (username not in groups) and (user_dn not in groups):
+			return ldap_auth(username, user_dn, password)
 
 	if TRY_LDAP_ONLY_AUTH_FIRST and password != None:
 # If this works, we bail here

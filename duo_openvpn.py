@@ -11,7 +11,7 @@ import imp
 
 try:
 	config = imp.load_source('config', 'duo_openvpn.conf')
-except FileNotFoundError:
+except:
 	config = imp.load_source('config', '/etc/duo_openvpn.conf')
 sys.path.append('duo_client')
 

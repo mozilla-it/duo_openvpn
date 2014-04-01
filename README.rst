@@ -19,7 +19,7 @@ Features
 
 Configuration
 -------------
-Look at config.py.inc and rename/copy it to config.py. Here are some examples & help:
+Look at duo_openvpn.conf.inc and rename/copy it to duo_openvpn.conf (or /etc/duo_openvpn.conf). Here are some examples & help:
 
 :TRY_LDAP_ONLY_AUTH_FIRST=False: Try to auth LDAP first, if succeeds, bypass DuoSec.
 :LDAP_URL="ldap://ldap.db.scl3.mozilla.com": Needed for any LDAP operation, else leave empty.

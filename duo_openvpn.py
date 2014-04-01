@@ -16,14 +16,19 @@ import syslog
 import cPickle as pickle
 import ldap
 import mozdef
-from config import *
+import imp
+
+try:
+	config = imp.load_source('config', 'duo_openvpn.conf')
+except FileNotFoundError:
+	config = imp.load_source('config', '/etc/duo_openvpn.conf')
 
 def log(msg):
-	if LOG_METHOD == 'mozdef':
-		mozmsg = mozdef.MozDefMsg(MOZDEF_URL, tags=['openvpn', 'duosecurity'])
+	if config.LOG_METHOD == 'mozdef':
+		mozmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['openvpn', 'duosecurity'])
 		mozmsg.send(msg)
 	else:
-		if LOG_METHOD == 'cef':
+		if config.LOG_METHOD == 'cef':
 			msg = cef(msg)
 		syslog.openlog('duo_openvpn', 0, syslog.LOG_DAEMON)
 		syslog.syslog(syslog.LOG_INFO, msg)
@@ -45,7 +50,7 @@ def cef(title="DuoAPI", msg="", ext=""):
 	return cefmsg
 
 def ldap_get_dn(username):
-	dn = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'dn', True)
+	dn = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN, config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN, 'mail='+username, 'dn', True)
 	return dn
 
 def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=False):
@@ -73,7 +78,7 @@ def ldap_auth(username, user_dn, password):
 		log('User %s LDAP authentication failed' % username)
 		return False
 
-	conn = ldap.initialize(LDAP_URL)
+	conn = ldap.initialize(config.LDAP_URL)
 	try:
 		conn.bind_s(user_dn, password)
 		conn.unbind_s()
@@ -131,7 +136,7 @@ class DuoAPIAuth:
 			return
 		now = time.time()
 		self.user_cache[self.username] = {'timestamp': now+self.user_cache_time, 'ipaddr': self.client_ipaddr}
-		pickle.dump(self.user_cache, open(USER_CACHE_PATH, "wb"))
+		pickle.dump(self.user_cache, open(config.USER_CACHE_PATH, "wb"))
 
 	def ping(self):
 		now = time.time()
@@ -238,20 +243,25 @@ def main():
 		password = None
 
 	user_dn = ldap_get_dn(username)
-	if LDAP_CONTROL_BIND_DN != '':
+	if config.LDAP_CONTROL_BIND_DN != '':
 # Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
-		uid = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_BASE_DN, 'mail='+username, 'uid')[0]
-		groups = ldap_attr_get(LDAP_URL, LDAP_CONTROL_BIND_DN, LDAP_CONTROL_PASSWORD, LDAP_CONTROL_BASE_DN, LDAP_DUOSEC_ATTR_VALUE, LDAP_DUOSEC_ATTR)
+		uid = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
+							config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN,
+							'mail='+username, 'uid')[0]
+		groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
+								config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
+								config.LDAP_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
 		if (uid not in groups) and (username not in groups) and (user_dn not in groups):
 			return ldap_auth(username, user_dn, password)
 
-		if TRY_LDAP_ONLY_AUTH_FIRST and password != None:
+		if config.TRY_LDAP_ONLY_AUTH_FIRST and password != None:
 # If this works, we bail here
 			if ldap_auth(username, user_dn, password):
 				return True
 
 	if factor != None:
-		duo = DuoAPIAuth(IKEY, SKEY, HOST, username, client_ipaddr, factor, passcode, USERNAME_HACK, FAIL_OPEN, USER_CACHE_PATH, USER_CACHE_TIME)
+		duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr, factor,
+						passcode, config.USERNAME_HACK, config.FAIL_OPEN, config.USER_CACHE_PATH, config.USER_CACHE_TIME)
 		return duo.auth()
 
 	log('User %s authentication failed' % username)

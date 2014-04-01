@@ -6,22 +6,26 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Contributors: gdestuynder@mozilla.com
 
-import duo_client
-import time
-import socket
 import sys
-import os
-import traceback
-import syslog
-import cPickle as pickle
-import ldap
-import mozdef
 import imp
 
 try:
 	config = imp.load_source('config', 'duo_openvpn.conf')
 except FileNotFoundError:
 	config = imp.load_source('config', '/etc/duo_openvpn.conf')
+sys.path.append('duo_client')
+
+import duo_client
+import time
+import socket
+import os
+import traceback
+import syslog
+import cPickle as pickle
+if config.LDAP_CONTROL_BIND_DN:
+	import ldap
+if config.LOG_METHOD == 'mozdef':
+	import mozdef
 
 def log(msg):
 	if config.LOG_METHOD == 'mozdef':

@@ -13,12 +13,13 @@ Features
 - Fail open (optional).
 - OTP and Push (use push as password for push, passcode:123456 as password for OTP, where 123456 is your OTP).
 - CEF support.
+- MozDef support.
 - Optional username hack, in case you use emails as certificate CN but only the first part of the email as login.
 - Supports logging with LDAP with or instead-of Duo.
 
 Configuration
 -------------
-Look at the top of the file. Here are some examples & help:
+Look at config.py.inc and rename/copy it to config.py. Here are some examples & help:
 
 :TRY_LDAP_ONLY_AUTH_FIRST=False: Try to auth LDAP first, if succeeds, bypass DuoSec.
 :LDAP_URL="ldap://ldap.db.scl3.mozilla.com": Needed for any LDAP operation, else leave empty.

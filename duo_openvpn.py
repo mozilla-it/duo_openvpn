@@ -246,27 +246,49 @@ def main():
 		factor = password
 		password = None
 
-	user_dn = ldap_get_dn(username)
+	try:
+		user_dn = ldap_get_dn(username)
+	except:
+		traceback.print_exc()
+		log('User %s (%s) authentication failed, because ldap_get_db() failed to get his full LDAP dn' % (username, client_ipaddr))
+		return False
+
 	if config.LDAP_CONTROL_BIND_DN != '':
 # Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
-		uid = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
-							config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN,
-							'mail='+username, 'uid')[0]
-		groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
-								config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
-								config.LDAP_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
-		if (uid not in groups) and (username not in groups) and (user_dn not in groups):
-			return ldap_auth(username, user_dn, password)
+		try:
+			uid = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
+								config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN,
+								'mail='+username, 'uid')[0]
+			groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
+									config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
+									config.LDAP_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
+		except:
+			traceback.print_exc()
+			log('User %s (%s) authentication failed, because ldap_attr_get() failed to get his uid or group attributes' % (username, client_ipaddr))
+			return False
+
+		try:
+			if (uid not in groups) and (username not in groups) and (user_dn not in groups):
+				return ldap_auth(username, user_dn, password)
+		except:
+			traceback.print_exc()
+			log('User %s (%s) authentication failed, because ldap_auth() failed unexpectedly' % (username, client_ipaddr))
+			return False
 
 		if config.TRY_LDAP_ONLY_AUTH_FIRST and password != None:
 # If this works, we bail here
 			if ldap_auth(username, user_dn, password):
 				return True
 
-	if factor != None:
-		duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr, factor,
-						passcode, config.USERNAME_HACK, config.FAIL_OPEN, config.USER_CACHE_PATH, config.USER_CACHE_TIME)
-		return duo.auth()
+	try:
+		if factor != None:
+			duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr, factor,
+							passcode, config.USERNAME_HACK, config.FAIL_OPEN, config.USER_CACHE_PATH, config.USER_CACHE_TIME)
+			return duo.auth()
+	except:
+		log('User %s (%s) authentication failed, because DuoAPIAuth() failed unexpectedly' % (username, client_ipaddr))
+		traceback.print_exc()
+		return False
 
 	log('User %s authentication failed' % username)
 	return False

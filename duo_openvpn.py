@@ -296,10 +296,16 @@ def main():
 if __name__ == "__main__":
 	control = os.environ.get('control')
 	if main():
-		with open(control) as f:
-			f.write('1')
+		try:
+			with open(control) as f:
+				f.write('1')
+		except:
+			pass
 		sys.exit(0)
 
-	with open(control) as f:
-		f.write('0')
+	try:
+		with open(control) as f:
+			f.write('0')
+	except:
+		pass
 	sys.exit(1)

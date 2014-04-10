@@ -294,6 +294,12 @@ def main():
 	return False
 
 if __name__ == "__main__":
+	control = os.environ.get('control')
 	if main():
+		with open(control) as f:
+			f.write('1')
 		sys.exit(0)
+
+	with open(control) as f:
+		f.write('0')
 	sys.exit(1)

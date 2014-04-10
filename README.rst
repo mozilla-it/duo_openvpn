@@ -41,4 +41,4 @@ Attributes: {'posix_sysadmins': {'memberUid': "user1", "hi", "user2, ... }}
 TODO
 ----
 
-- Support for control file. We don't use it, but some may. Not really hard to add, tho.
+- NOP

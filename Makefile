@@ -12,6 +12,7 @@ plugin: duo_openvpn.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-soname,duo_openvpn.so -o duo_openvpn.so duo_openvpn.o
 
 install: plugin
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 	$(INSTALL) -m755 duo_openvpn.so $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 	$(INSTALL) -m755 duo_openvpn.py $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 	$(INSTALL) -m600 duo_openvpn.conf.inc $(DESTDIR)/etc/duo_openvpn.conf

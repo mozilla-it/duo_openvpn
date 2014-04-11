@@ -12,6 +12,8 @@ import imp
 try:
 	config = imp.load_source('config', 'duo_openvpn.conf')
 except:
+	config = imp.load_source('config', '/etc/openvpn/duo_openvpn.conf')
+else:
 	config = imp.load_source('config', '/etc/duo_openvpn.conf')
 sys.path.append('duo_client')
 

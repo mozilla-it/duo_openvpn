@@ -8,7 +8,7 @@ PREFIX	:= /usr/
 all: plugin
 
 plugin: duo_openvpn.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -c duo_openvpn.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -I. -c duo_openvpn.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-soname,duo_openvpn.so -o duo_openvpn.so duo_openvpn.o
 
 install: plugin

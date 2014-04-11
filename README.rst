@@ -16,9 +16,24 @@ Features
 - MozDef support.
 - Optional username hack, in case you use emails as certificate CN but only the first part of the email as login.
 - Supports logging with LDAP with or instead-of Duo.
+- Deferred call.
 
 Configuration
 -------------
+
+C plugin
+~~~~~~~~
+Call it from openvpn configuration with:
+
+.. code::
+
+   plugin /usr/lib/openvpn/plugins/duo_openvpn.so /usr/lib/openvpn/plugins/duo_openvpn.py
+
+This allow making a deferred call for authentication while using a script instead of blocking OpenVPN.
+This is needed as otherwise Duo will block OpenVPN while waiting for a push reply or OTP input.
+
+Python script
+~~~~~~~~~~~~~
 Look at duo_openvpn.conf.inc and rename/copy it to duo_openvpn.conf (or /etc/duo_openvpn.conf). Here are some examples & help:
 
 :TRY_LDAP_ONLY_AUTH_FIRST=False: Try to auth LDAP first, if succeeds, bypass DuoSec.

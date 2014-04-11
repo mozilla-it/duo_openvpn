@@ -26,29 +26,8 @@
 #include <openvpn-plugin.h>
 
 struct context {
-	char *auth_user_pass_path;
-	char *learn_address_path;
+	char *script_path;
 };
-
-static const char *
-get_env(const char *name, const char *envp[])
-{
-	int i, namelen;
-	const char *cp;
-	
-	if (envp) {
-		namelen = strlen(name);
-		for (i = 0; envp[i]; ++i) {
-			if (!strncmp(envp[i], name, namelen)) {
-				cp = envp[i] + namelen;
-				if (*cp == '=') {
-					return cp + 1;
-				}
-			}
-		}
-	}
-	return NULL;
-}
 
 static int
 generic_deferred_handler(char *script_path, const char * envp[])
@@ -79,10 +58,7 @@ openvpn_plugin_func_v2(openvpn_plugin_handle_t handle, const int type, const cha
 	struct context *ctx = (struct context *) handle;
 
 	if (type == OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY) {
-		return generic_deferred_handler(ctx->auth_user_pass_path, envp);
-	}
-	if (type == OPENVPN_PLUGIN_LEARN_ADDRESS) {
-		return generic_deferred_handler(ctx->learn_address_path, envp);
+		return generic_deferred_handler(ctx->script_path, envp);
 	} else {
 		return OPENVPN_PLUGIN_FUNC_ERROR;
 	}
@@ -97,14 +73,9 @@ openvpn_plugin_open_v2(unsigned int *type_mask, const char *argv[], const char *
 	ctx = (struct context *) calloc(1, sizeof(struct context));
 
 	if (argv[1]) {
-		ctx->auth_user_pass_path = strdup(argv[1]);
+		ctx->script_path = strdup(argv[1]);
 	}
-	if (argv[2]) {
-		ctx->learn_address_path = strdup(argv[2]);
-	}
-
-	*type_mask = OPENVPN_PLUGIN_MASK(OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY) |
-				OPENVPN_PLUGIN_MASK(OPENVPN_PLUGIN_LEARN_ADDRESS);
+	*type_mask = OPENVPN_PLUGIN_MASK(OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY);
 
 	return (openvpn_plugin_handle_t) ctx;
 }
@@ -114,7 +85,6 @@ openvpn_plugin_close_v1(openvpn_plugin_handle_t handle)
 {
 	struct context *ctx = (struct context *) handle;
 
-	free(ctx->auth_user_pass_path);
-	free(ctx->learn_address_path);
+	free(ctx->script_path);
 	free(ctx);
 }

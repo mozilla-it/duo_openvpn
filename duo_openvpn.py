@@ -16,9 +16,10 @@ config = None
 for cfg in cfg_path:
 	if os.path.isfile(cfg):
 		try:
-			config = imp.load_source('config', 'duo_openvpn.conf')
+			config = imp.load_source('config', cfg)
 		except:
 			pass
+
 if config == None:
 	print("Failed to load config")
 	sys.exit(1)

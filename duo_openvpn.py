@@ -11,6 +11,7 @@ import imp
 import os
 
 cfg_path = ['duo_openvpn.conf', '/etc/openvpn/duo_openvpn.conf', '/etc/duo_openvpn.conf']
+config = None
 
 for cfg in cfg_path:
 	if os.path.isfile(cfg):

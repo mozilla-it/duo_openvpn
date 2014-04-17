@@ -3,7 +3,7 @@ CFLAGS	:=
 LDFLAGS	:= -fPIC -shared
 INSTALL	:= install
 DESTDIR	:= /
-PREFIX	:= /usr/
+PREFIX	:= /usr
 
 all: plugin
 

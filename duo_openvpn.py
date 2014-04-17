@@ -8,19 +8,25 @@
 
 import sys
 import imp
+import os
 
-try:
-	config = imp.load_source('config', 'duo_openvpn.conf')
-except:
-	config = imp.load_source('config', '/etc/openvpn/duo_openvpn.conf')
-else:
-	config = imp.load_source('config', '/etc/duo_openvpn.conf')
+cfg_path = ['duo_openvpn.conf', '/etc/openvpn/duo_openvpn.conf', '/etc/duo_openvpn.conf']
+
+for cfg in cfg_path:
+	if os.path.isfile(cfg):
+		try:
+			config = imp.load_source('config', 'duo_openvpn.conf')
+		except:
+			pass
+if config == None:
+	print("Failed to load config")
+	sys.exit(1)
+
 sys.path.append('duo_client')
 
 import duo_client
 import time
 import socket
-import os
 import traceback
 import syslog
 import cPickle as pickle

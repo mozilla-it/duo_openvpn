@@ -311,17 +311,20 @@ def main():
 	return False
 
 if __name__ == "__main__":
-	control = os.environ.get('control')
+	control = os.environ.get('auth_control_file')
+	if control == None:
+		log('No control file found, if using a deferred plugin authentication will stall and fail.')
+
 	if main():
 		try:
-			with open(control) as f:
+			with open(control, 'w') as f:
 				f.write('1')
 		except:
 			pass
 		sys.exit(0)
 
 	try:
-		with open(control) as f:
+		with open(control, 'w') as f:
 			f.write('0')
 	except:
 		pass

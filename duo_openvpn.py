@@ -226,7 +226,12 @@ class DuoAPIAuth:
 			return False
 
 def main():
+	username_trusted = True
 	username = os.environ.get('common_name')
+	if (username == None):
+# take username as provided by the user - it cannot be trusted
+		username = os.environ.get('username')
+		username_trusted = True
 	client_ipaddr = os.environ.get('untrusted_ip', '0.0.0.0')
 	password = os.environ.get('password', 'auto')
 	passcode = None
@@ -293,7 +298,7 @@ def main():
 				return True
 
 	try:
-		if factor != None:
+		if factor != None and username_trusted:
 			duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr, factor,
 							passcode, config.USERNAME_HACK, config.FAIL_OPEN, config.USER_CACHE_PATH, config.USER_CACHE_TIME)
 			return duo.auth()
@@ -302,7 +307,7 @@ def main():
 		traceback.print_exc()
 		return False
 
-	log('User %s authentication failed' % username)
+	log('User %s authentication failed (no trusted username/common_name with Duo push?)' % username)
 	return False
 
 if __name__ == "__main__":

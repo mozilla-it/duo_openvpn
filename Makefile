@@ -16,7 +16,7 @@ install: plugin
 	mkdir -p $(DESTDIR)/etc/openvpn/
 	$(INSTALL) -m755 duo_openvpn.so $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 	$(INSTALL) -m755 duo_openvpn.py $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
-	$(INSTALL) -m600 duo_openvpn.conf.inc $(DESTDIR)/etc/openvpn/duo_openvpn.conf
+	$(INSTALL) -m600 duo_openvpn.conf.inc $(DESTDIR)/etc/duo_openvpn.conf
 
 clean:
 	rm -f *.o

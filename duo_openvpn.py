@@ -234,6 +234,8 @@ def main():
 
 # Nope? then nope.
 	if username == None or password == None or password == '':
+		log("User %s (%s) Missing username or password, (reported username may be None due to this)" % (username,
+			client_ipaddr))
 		return False
 
 # If your password is push/sms/phone/auto then you don't deserve to use this anyway :P

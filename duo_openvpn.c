@@ -35,7 +35,6 @@ generic_deferred_handler(char *script_path, const char * envp[])
 	int pid;
 	char *argv[] = {script_path, 0};
 	
-	signal(SIGCHLD, SIG_IGN);
 	pid = fork();
 
 	if (pid < 0) {

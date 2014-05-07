@@ -5,6 +5,17 @@ Duo_openvpn
 Our own take at duo_openvpn support.
 Not very happy with the provided duo_openvpn support, we rewrote it to use duo_client_python which is much nicer.
 
+Git submodules
+--------------
+
+In order to checkout all the modules necessary for this to build, run
+
+.. code::
+
+	git clone --recursive git@github.com:mozilla-it/duo_openvpn.git
+	# Or, if already checked out:
+	git submodule update --init --recursive
+
 Features
 --------
 

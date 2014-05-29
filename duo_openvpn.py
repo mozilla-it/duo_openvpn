@@ -124,8 +124,10 @@ class DuoAPIAuth:
 			host=host)
 
 		if os.path.isfile(cache_path):
+			self.cache_path = cache_path
 			self.user_cache = pickle.load(open(cache_path, "rb"))
 		else:
+			self.cache_path = None
 			self.user_cache = {}
 
 	def fail_open(self):
@@ -148,9 +150,11 @@ class DuoAPIAuth:
 		# No IP? No cache for you.
 		if self.client_ipaddr == '0.0.0.0':
 			return
+		if self.cache_path == None
+			return
 		now = time.time()
 		self.user_cache[self.username] = {'timestamp': now+self.user_cache_time, 'ipaddr': self.client_ipaddr}
-		pickle.dump(self.user_cache, open(config.USER_CACHE_PATH, "wb"))
+		pickle.dump(self.user_cache, open(self.cache_path, "wb"))
 
 	def ping(self):
 		now = time.time()

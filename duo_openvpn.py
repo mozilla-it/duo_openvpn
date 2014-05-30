@@ -150,7 +150,7 @@ class DuoAPIAuth:
 		# No IP? No cache for you.
 		if self.client_ipaddr == '0.0.0.0':
 			return
-		if self.cache_path == None
+		if self.cache_path == None:
 			return
 		now = time.time()
 		self.user_cache[self.username] = {'timestamp': now+self.user_cache_time, 'ipaddr': self.client_ipaddr}

@@ -235,14 +235,14 @@ def main():
 	if (username == None):
 # take username as provided by the user - it cannot be trusted
 		username = os.environ.get('username')
-		username_trusted = True
+		username_trusted = False
 	client_ipaddr = os.environ.get('untrusted_ip', '0.0.0.0')
 	password = os.environ.get('password', 'auto')
 	passcode = None
 	factor = None
 
 # Nope? then nope.
-	if username == None or password == None or password == '':
+	if username == None or username == '' or password == None or password == '':
 		log("User %s (%s) Missing username or password, (reported username may be None due to this)" % (username,
 			client_ipaddr))
 		return False

@@ -7,8 +7,13 @@ FAIL_OPEN=True
 # Use 0 to disable.
 USER_CACHE_TIME=60*60*24
 USER_CACHE_PATH="/var/tmp/vpn_user_cache.pickle"
-#cef, none, or mozdef
-LOG_METHOD='mozdef'
+
+# Log settings
+# USE_SYSLOG only make sense when not using USE_LEGACY_CEF as CEF is always sent over syslog anyway
+USE_LEGACY_CEF=False
+USE_SYSLOG=True
+USE_MOZDEF=True
+
 MOZDEF_LOGGER='https://127.0.0.1:8080/events'
 USERNAME_HACK=True
 

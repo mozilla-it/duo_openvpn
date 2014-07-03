@@ -34,16 +34,19 @@ import syslog
 import cPickle as pickle
 if config.LDAP_CONTROL_BIND_DN:
 	import ldap
-if config.LOG_METHOD == 'mozdef':
+if config.USE_MOZDEF:
 	import mozdef
 
 def log(msg):
-	if config.LOG_METHOD == 'mozdef':
+	if not config.USE_LEGACY_CEF:
 		mozmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['openvpn', 'duosecurity'])
+		if config.USE_SYSLOG:
+			mdmsg.sendToSyslog = True
+		if not config.USE_MOZDEF:
+			mdmsg.syslogOnly = True
 		mozmsg.send(msg)
 	else:
-		if config.LOG_METHOD == 'cef':
-			msg = cef(msg)
+		msg = cef(msg)
 		syslog.openlog('duo_openvpn', 0, syslog.LOG_DAEMON)
 		syslog.syslog(syslog.LOG_INFO, msg)
 		syslog.closelog()

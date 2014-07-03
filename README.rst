@@ -64,7 +64,26 @@ Attributes: {'posix_sysadmins': {'memberUid': "user1", "hi", "user2, ... }}
 :LDAP_DUOSEC_ATTR_VALUE="cn=posix_sysadmins": Will look for that attribute, when checking for DuoSecurity users.
 :LDAP_DUOSEC_ATTR="memberUid": Will look for that value in the attribute.
 
+Misc scripts
+~~~~~~~~~~~~
+The /scripts directory contains additional goodies.
+
+vpn_kill_users
+===============
+If you use reneg-sec 0 as setting so that OpenVPN does not renegociate (or renegociates very rarely should you use
+another setting than 0 but that is still very high), you might still want to automatically disconnect users that you
+have disabled in LDAP.
+
+Run this in a crontab periodically, it'll pool for the users and kill em.
+
+Recommended openvpn server settings:
+
+.. code::
+
+   management /var/run/openvpn-udp-stage.socket unix
+   management-client-group vpnmgmt
+
 TODO
 ----
 
-- NOP
+- use mozlibldap for the duo script

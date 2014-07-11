@@ -41,9 +41,9 @@ def log(msg):
 	if not config.USE_LEGACY_CEF:
 		mozmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['openvpn', 'duosecurity'])
 		if config.USE_SYSLOG:
-			mdmsg.sendToSyslog = True
+			mozmsg.sendToSyslog = True
 		if not config.USE_MOZDEF:
-			mdmsg.syslogOnly = True
+			mozmsg.syslogOnly = True
 		mozmsg.send(msg)
 	else:
 		msg = cef(msg)

@@ -31,6 +31,9 @@ LDAP_BASE_DN=''
 LDAP_CONTROL_BIND_DN=""
 LDAP_CONTROL_PASSWORD=""
 LDAP_CONTROL_BASE_DN=""
-# Only this attr value can log
+# Only users with this attribute can log in at all
+LDAP_MUST_ATTR_VALUE=""
+LDAP_MUST_ATTR=""
+# Only users this attr value can log with Duo
 LDAP_DUOSEC_ATTR_VALUE=""
 LDAP_DUOSEC_ATTR=""

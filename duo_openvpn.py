@@ -274,10 +274,25 @@ def main():
 		user_dn = ldap_get_dn(username)
 	except:
 		traceback.print_exc()
-		log('User %s (%s) authentication failed, because ldap_get_db() failed to get his full LDAP dn' % (username, client_ipaddr))
+		log('User %s (%s) authentication failed, because ldap_get_db() failed to get user full LDAP dn' % (username, client_ipaddr))
 		return False
 
 	if config.LDAP_CONTROL_BIND_DN != '':
+# User in an authorized group to use the VPN at all?
+		if config.LDAP_MUST_ATTR != '':
+			try:
+				groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
+										config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
+										config.LDAP_MUST_ATTR_VALUE, config.LDAP_MUST_ATTR)
+			except:
+				traceback.print_exc()
+				log('User %s (%s) authentication failed, because ldap_attr_get() failed to get user group attributes' % (username, client_ipaddr))
+				return False
+
+			if (user_dn not in groups)
+				log('Authentication failed: rejecting user %s (%s) - not part of the allowed group attributes' % (username, client_ipaddr))
+				return False
+
 # Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
 		try:
 			uid = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
@@ -288,7 +303,7 @@ def main():
 									config.LDAP_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
 		except:
 			traceback.print_exc()
-			log('User %s (%s) authentication failed, because ldap_attr_get() failed to get his uid or group attributes' % (username, client_ipaddr))
+			log('User %s (%s) authentication failed, because ldap_attr_get() failed to get user uid or group attributes' % (username, client_ipaddr))
 			return False
 
 		try:

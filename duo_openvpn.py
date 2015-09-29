@@ -250,6 +250,11 @@ def main():
 			client_ipaddr))
 		return False
 
+# If you don't have a password, your username is your password (For ex you might be pasting an OTP as username. That's
+# totally ok!
+	if (len(username) == 0 and username.isdigit():
+		password = username
+
 # If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P
 	if password not in ['push', 'sms', 'phone', 'auto']:
 		if (password.isdigit() and len(password) == 6 or len(password) == 8):

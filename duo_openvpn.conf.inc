@@ -34,6 +34,6 @@ LDAP_CONTROL_BASE_DN=""
 # Only users with this attribute can log in at all
 LDAP_MUST_ATTR_VALUE=""
 LDAP_MUST_ATTR=""
-# Only users this attr value can log with Duo
-LDAP_DUOSEC_ATTR_VALUE=""
+# Users this attr value will BYPASS duo auth.
+LDAP_NO_DUOSEC_ATTR_VALUE=""
 LDAP_DUOSEC_ATTR=""

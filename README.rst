@@ -61,7 +61,7 @@ Attributes: {'posix_sysadmins': {'memberUid': "user1", "hi", "user2, ... }}
 :LDAP_CONTROL_BIND_DN="uid=bind-openvpn,ou=logins,dc=mozilla": Bind to that user for attribute checks.
 :LDAP_CONTROL_PASSWORD="": The password for the above user.
 :LDAP_CONTROL_BASE_DN="ou=groups,dc=mozilla": The base DN for the above attribute search.
-:LDAP_DUOSEC_ATTR_VALUE="cn=posix_sysadmins": Will look for that attribute, when checking for DuoSecurity users.
+:LDAP_NO_DUOSEC_ATTR_VALUE="cn=posix_sysadmins": Will look for that attribute, to see if you should bypass Duo authentication.
 :LDAP_DUOSEC_ATTR="memberUid": Will look for that value in the attribute.
 
 Misc scripts

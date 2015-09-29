@@ -250,7 +250,7 @@ def main():
 			client_ipaddr))
 		return False
 
-# If your password is push/sms/phone/auto then you don't deserve to use this anyway :P
+# If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P
 	if password not in ['push', 'sms', 'phone', 'auto']:
 		if (password.isdigit() and len(password) == 6 or len(password) == 8):
 			passcode = password

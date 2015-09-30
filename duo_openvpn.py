@@ -252,7 +252,7 @@ def main():
 
 # If you don't have a password, your username is your password (For ex you might be pasting an OTP as username. That's
 # totally ok!
-	if (len(username) == 0 and username.isdigit():
+	if (len(username) == 0 and username.isdigit()):
 		password = username
 
 # If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P

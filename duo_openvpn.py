@@ -294,7 +294,7 @@ def main():
 				log('User %s (%s) authentication failed, because ldap_attr_get() failed to get user group attributes' % (username, client_ipaddr))
 				return False
 
-			if (user_dn not in groups)
+			if (user_dn not in groups):
 				log('Authentication failed: rejecting user %s (%s) - not part of the allowed group attributes' % (username, client_ipaddr))
 				return False
 

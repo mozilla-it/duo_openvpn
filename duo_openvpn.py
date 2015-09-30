@@ -235,9 +235,11 @@ class DuoAPIAuth:
 def main():
 	username_trusted = True
 	username = os.environ.get('common_name')
+# this is the username as provided by the user - it cannot be trusted
+# we use it in case common_name is not present, or as password for OTP
+	username_untrusted = os.environ.get('username')
 	if (username == None):
-# take username as provided by the user - it cannot be trusted
-		username = os.environ.get('username')
+		username_untrusted = os.environ.get('username')
 		username_trusted = False
 	client_ipaddr = os.environ.get('untrusted_ip', '0.0.0.0')
 	password = os.environ.get('password', 'auto')
@@ -245,15 +247,15 @@ def main():
 	factor = None
 
 # Nope? then nope.
-	if username == None or username == '' or password == None or password == '':
+	if (username == None or username == '') and (password == None or password == ''):
 		log("User %s (%s) Missing username or password, (reported username may be None due to this)" % (username,
 			client_ipaddr))
 		return False
 
 # If you don't have a password, your username is your password (For ex you might be pasting an OTP as username. That's
 # totally ok!
-	if (len(username) == 0 and username.isdigit()):
-		password = username
+	if (len(password) == 0 and username_untrusted.isdigit()):
+		password = username_untrusted
 
 # If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P
 	if password not in ['push', 'sms', 'phone', 'auto']:

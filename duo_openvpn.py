@@ -250,7 +250,12 @@ def main():
 			client_ipaddr))
 		return False
 
-# If your password is push/sms/phone/auto then you don't deserve to use this anyway :P
+# If you don't have a password, your username is your password (For ex you might be pasting an OTP as username. That's
+# totally ok!
+	if (len(username) == 0 and username.isdigit():
+		password = username
+
+# If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P
 	if password not in ['push', 'sms', 'phone', 'auto']:
 		if (password.isdigit() and len(password) == 6 or len(password) == 8):
 			passcode = password
@@ -293,21 +298,22 @@ def main():
 				log('Authentication failed: rejecting user %s (%s) - not part of the allowed group attributes' % (username, client_ipaddr))
 				return False
 
-# Only use DuoSec for users with LDAP_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
+# DO NOT USE DuoSec for users with LDAP_NO_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
 		try:
 			uid = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
 								config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN,
 								'mail='+username, 'uid')[0]
 			groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
 									config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
-									config.LDAP_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
+									config.LDAP_NO_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
 		except:
 			traceback.print_exc()
 			log('User %s (%s) authentication failed, because ldap_attr_get() failed to get user uid or group attributes' % (username, client_ipaddr))
 			return False
 
 		try:
-			if (uid not in groups) and (username not in groups) and (user_dn not in groups):
+			if (uid in groups) or (username in groups) or (user_dn in groups):
+				log('Bypassing DuoSec authentication for user %s - using LDAP only instead (whitelisted)')
 				return ldap_auth(username, user_dn, password)
 		except:
 			traceback.print_exc()

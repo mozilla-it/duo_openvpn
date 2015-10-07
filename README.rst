@@ -2,6 +2,9 @@
 Duo_openvpn
 ===========
 
+.. image:: https://travis-ci.org/mozilla-it/duo_openvpn.svg?branch=master
+    :target: https://travis-ci.org/mozilla-it/duo_openvpn
+
 Our own take at duo_openvpn support.
 Not very happy with the provided duo_openvpn support, we rewrote it to use duo_client_python which is much nicer.
 

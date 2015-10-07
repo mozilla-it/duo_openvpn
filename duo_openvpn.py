@@ -37,6 +37,7 @@ if config.LDAP_CONTROL_BIND_DN:
 if config.USE_MOZDEF:
     import mozdef
 
+
 def log(msg):
     if not config.USE_LEGACY_CEF:
         mozmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['openvpn', 'duosecurity'])
@@ -51,24 +52,27 @@ def log(msg):
         syslog.syslog(syslog.LOG_INFO, msg)
         syslog.closelog()
 
+
 def cef(title="DuoAPI", msg="", ext=""):
     hostname = socket.gethostname()
     cefmsg = 'CEF:{v}|{deviceVendor}|{deviceProduct}|{deviceVersion}|{signatureID}|{name}|{message}|{deviceSeverity}|{extension}'.format(
-                    v='0',
-                    deviceVendor='Mozilla',
-                    deviceProduct='OpenVPN',
-                    deviceVersion='1.0',
-                    signatureID='0',
-                    name=title,
-                    message=msg,
-                    deviceSeverity='5',
-                    extension=ext+' dhost=' + hostname,
-                )
+        v='0',
+        deviceVendor='Mozilla',
+        deviceProduct='OpenVPN',
+        deviceVersion='1.0',
+        signatureID='0',
+        name=title,
+        message=msg,
+        deviceSeverity='5',
+        extension=ext+' dhost=' + hostname,
+    )
     return cefmsg
+
 
 def ldap_get_dn(username):
     dn = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN, config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN, 'mail='+username, 'dn', True)
     return dn
+
 
 def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=False):
     conn = ldap.initialize(url)
@@ -81,7 +85,7 @@ def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=Fa
 
     try:
         res = conn.search_s(basedn, ldap.SCOPE_SUBTREE, value_filter, [attr])
-        #list of attributes
+        # list of attributes
         if attr_key:
             return res[0][0]
         else:
@@ -89,6 +93,7 @@ def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=Fa
     except:
         log('ldap_attr_get() filter search failed for %s=>%s (returning key? %s)' % (value_filter, attr, attr_key))
         return None
+
 
 def ldap_auth(username, user_dn, password):
     if (username == None) or (password == None) or (user_dn == None):
@@ -105,6 +110,7 @@ def ldap_auth(username, user_dn, password):
         conn.unbind_s()
     log('User %s LDAP authentication failed' % username)
     return False
+
 
 class DuoAPIAuth:
     def __init__(self, ikey, skey, host, username, client_ipaddr, factor, passcode, username_hack, failmode, cache_path, cache_time):
@@ -186,11 +192,12 @@ class DuoAPIAuth:
 
     def doauth(self):
         if self.passcode:
-            res = self.auth_api.auth(username=self.username, factor=self.factor, ipaddr=self.client_ipaddr,
-                                passcode=self.passcode)
+            res = self.auth_api.auth(username=self.username, factor=self.factor,
+                                     ipaddr=self.client_ipaddr, passcode=self.passcode)
         else:
-            res = self.auth_api.auth(username=self.username, factor=self.factor, ipaddr=self.client_ipaddr,
-                                type="OpenVPN login", pushinfo="From%20server="+self.hostname, device="auto")
+            res = self.auth_api.auth(username=self.username, factor=self.factor,
+                                     ipaddr=self.client_ipaddr, type="OpenVPN login",
+                                     pushinfo="From%20server="+self.hostname, device="auto")
         return res
 
     def auth(self):
@@ -232,11 +239,12 @@ class DuoAPIAuth:
             log('User %s is not allowed to authenticate' % self.username)
             return False
 
+
 def main():
     username_trusted = True
     username = os.environ.get('common_name')
-# this is the username as provided by the user - it cannot be trusted
-# we use it in case common_name is not present, or as password for OTP
+    # this is the username as provided by the user - it cannot be trusted
+    # we use it in case common_name is not present, or as password for OTP
     username_untrusted = os.environ.get('username')
     if (username == None):
         username_untrusted = os.environ.get('username')
@@ -246,18 +254,18 @@ def main():
     passcode = None
     factor = None
 
-# Nope? then nope.
+    # Nope? then nope.
     if (username == None or username == '') and (password == None or password == ''):
         log("User %s (%s) Missing username or password, (reported username may be None due to this)" % (username,
             client_ipaddr))
         return False
 
-# If you don't have a password, your username is your password (For ex you might be pasting an OTP as username. That's
-# totally ok!
+    # If you don't have a password, your username is your password.
+    # For example you might be pasting an OTP as username. That's totally ok!
     if (len(password) == 0 and username_untrusted.isdigit()):
         password = username_untrusted
 
-# If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P
+    # If your real password is push/sms/phone/auto then you don't deserve to use this anyway :P
     if password not in ['push', 'sms', 'phone', 'auto']:
         if (password.isdigit() and len(password) == 6 or len(password) == 8):
             passcode = password
@@ -268,7 +276,7 @@ def main():
         elif password.find(':') != -1:
             tmp = password.split(':')[1]
             if (tmp.isdigit() and len(tmp) == 6 or len(tmp) == 8):
-                passcode=tmp
+                passcode = tmp
                 factor = 'passcode'
                 password = password.split(':')[0]
         else:
@@ -285,12 +293,12 @@ def main():
         return False
 
     if config.LDAP_CONTROL_BIND_DN != '':
-# User in an authorized group to use the VPN at all?
+        # User in an authorized group to use the VPN at all?
         if config.LDAP_MUST_ATTR != '':
             try:
                 groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
-                                        config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
-                                        config.LDAP_MUST_ATTR_VALUE, config.LDAP_MUST_ATTR)
+                                       config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
+                                       config.LDAP_MUST_ATTR_VALUE, config.LDAP_MUST_ATTR)
             except:
                 traceback.print_exc()
                 log('User %s (%s) authentication failed, because ldap_attr_get() failed to get user group attributes' % (username, client_ipaddr))
@@ -300,14 +308,14 @@ def main():
                 log('Authentication failed: rejecting user %s (%s) - not part of the allowed group attributes' % (username, client_ipaddr))
                 return False
 
-# DO NOT USE DuoSec for users with LDAP_NO_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
+        # DO NOT USE DuoSec for users with LDAP_NO_DUOSEC_ATTR_VALUE in LDAP_DUOSEC_ATTR
         try:
             uid = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
                                 config.LDAP_CONTROL_PASSWORD, config.LDAP_BASE_DN,
                                 'mail='+username, 'uid')[0]
             groups = ldap_attr_get(config.LDAP_URL, config.LDAP_CONTROL_BIND_DN,
-                                    config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
-                                    config.LDAP_NO_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
+                                   config.LDAP_CONTROL_PASSWORD, config.LDAP_CONTROL_BASE_DN,
+                                   config.LDAP_NO_DUOSEC_ATTR_VALUE, config.LDAP_DUOSEC_ATTR)
         except:
             traceback.print_exc()
             log('User %s (%s) authentication failed, because ldap_attr_get() failed to get user uid or group attributes' % (username, client_ipaddr))
@@ -323,14 +331,15 @@ def main():
             return False
 
         if config.TRY_LDAP_ONLY_AUTH_FIRST and password != None:
-# If this works, we bail here
+            # If this works, we bail here
             if ldap_auth(username, user_dn, password):
                 return True
 
     try:
         if factor != None and username_trusted:
-            duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr, factor,
-                            passcode, config.USERNAME_HACK, config.FAIL_OPEN, config.USER_CACHE_PATH, config.USER_CACHE_TIME)
+            duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr,
+                             factor, passcode, config.USERNAME_HACK, config.FAIL_OPEN,
+                             config.USER_CACHE_PATH, config.USER_CACHE_TIME)
             return duo.auth()
     except:
         log('User %s (%s) authentication failed, because DuoAPIAuth() failed unexpectedly' % (username, client_ipaddr))

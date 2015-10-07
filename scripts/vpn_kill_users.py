@@ -34,12 +34,13 @@ if config == None:
     print("Failed to load config")
     sys.exit(1)
 
-#MozDef Logging
+# MozDef Logging
 mdmsg = mozdef.MozDefMsg(config.MOZDEF_HOST, tags=['openvpn', 'killusers'])
 if config.USE_SYSLOG:
     mdmsg.sendToSyslog = True
 if not config.USE_MOZDEF:
     mdmsg.syslogOnly = True
+
 
 class vpnmgmt():
     def __init__(self, socket_path):
@@ -49,13 +50,14 @@ class vpnmgmt():
 
     def connect(self, p):
         self.sock.connect(p)
-# get rid of the welcome msg
+        # get rid of the welcome msg
         self.sock.recv(1024)
 
     def send(self, command, stopon=None):
-# keep on reading until hitting timeout, in case the server is being slow
-# stopon is used to make this faster, you don't need to wait for timeout if you know you already
-# have the data. Be careful that it doesn't match unwanted data, tho.
+        # keep on reading until hitting timeout, in case the server is being slow
+        # stopon is used to make this faster, you don't need to wait for timeout
+        # if you know you already have the data. Be careful that it doesn't match
+        # unwanted data, though.
         self.sock.send(command+'\r\n')
         data = ''
         while True:
@@ -70,7 +72,7 @@ class vpnmgmt():
         return data
 
     def success(self, msg):
-# checks if OpenVPN returned SUCCESS or ERROR or else.
+        # checks if OpenVPN returned SUCCESS or ERROR or else.
         if msg.startswith('SUCCESS'):
             return True
         elif msg.startswith('INFO'):
@@ -97,8 +99,9 @@ class vpnmgmt():
         return users
 
     def kill(self, user):
-       ret = self.send('kill '+user, stopon='\r\n')
-       return (self.success(ret), ret)
+        ret = self.send('kill '+user, stopon='\r\n')
+        return (self.success(ret), ret)
+
 
 def usage():
     print("USAGE: "+sys.argv[0]+" </var/run/openvpn.sock>")
@@ -110,8 +113,9 @@ if __name__ == "__main__":
 
     vpn = vpnmgmt(sys.argv[1])
     l = mozlibldap.MozLDAP(config.LDAP_URL, config.LDAP_BIND_DN, config.LDAP_BIND_PASSWD)
-#this splits the LDAP DN format thus should theorically never fail (the token for split is the LDAP token)
-#it extracts the mail= part of the DN so that we have the same email as the OpenVPN certificate CN email/login name for matching.
+    # this splits the LDAP DN format thus should theoretically never fail (the token
+    # for split is the LDAP token). It extracts the mail= part of the DN so that we
+    # have the same email as the OpenVPN certificate CN email/login name for matching.
     enabled_users = [x.split(',')[0].split('=')[1] for x in l.get_all_enabled_users()]
     vpn_status = vpn.getstatus()
     vpn_users = [x for x in vpn_status]
@@ -119,5 +123,7 @@ if __name__ == "__main__":
     for user in vpn_users:
         if user not in enabled_users:
             mdmsg.send(summary=user+': not in the list of active LDAP users - disconnecting',
-                    details={'srcip': vpn_status[user][0].split(':')[0], 'user': user, 'connected_since': vpn_status[user][2]})
+                       details={'srcip': vpn_status[user][0].split(':')[0],
+                                'user': user,
+                                'connected_since': vpn_status[user][2]})
         vpn.kill(user)

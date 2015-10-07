@@ -63,20 +63,24 @@ Look at duo_openvpn.conf.inc and rename/copy it to duo_openvpn.conf (or /etc/duo
 LDAP control values are mainly used to filter on a group that has DuoSecurity enabled. If you're in that group, you get DuoSec, else, you get LDAP auth.
 Basically, we're looking up the user's uid from his email (as we're passed an email as common_name). If the uid == the email, that's fine too.
 Then, we lookup for an attribute in LDAP, and we check that the attribute's value's value (yeah..) == the uid. Looks like this:
-User: mail=hi@mozilla.com,o=com,dc=mozilla => uid = hi
-Attributes: {'posix_sysadmins': {'memberUid': "user1", "hi", "user2, ... }}
 
-+------------------------------------------------------------+--------------------------------------------------+
-|LDAP_CONTROL_BIND_DN="uid=bind-openvpn,ou=logins,dc=mozilla"| Bind to that user for attribute checks.          |
-+------------------------------------------------------------+--------------------------------------------------+
-|LDAP_CONTROL_PASSWORD=""                                    | The password for the above user.                 |
-+------------------------------------------------------------+--------------------------------------------------+
-|LDAP_CONTROL_BASE_DN="ou=groups,dc=mozilla"                 | The base DN for the above attribute search.      |
-+------------------------------------------------------------+--------------------------------------------------+
+.. code ::
+
+    User: mail=hi@mozilla.com,o=com,dc=mozilla => uid = hi
+    Attributes: {'posix_sysadmins': {'memberUid': "user1", "hi", "user2, ... }}
+
+
++------------------------------------------------------------+-----------------------------------------------------------------------------+
+|LDAP_CONTROL_BIND_DN="uid=bind-openvpn,ou=logins,dc=mozilla"| Bind to that user for attribute checks.                                     |
++------------------------------------------------------------+-----------------------------------------------------------------------------+
+|LDAP_CONTROL_PASSWORD=""                                    | The password for the above user.                                            |
++------------------------------------------------------------+-----------------------------------------------------------------------------+
+|LDAP_CONTROL_BASE_DN="ou=groups,dc=mozilla"                 | The base DN for the above attribute search.                                 |
++------------------------------------------------------------+-----------------------------------------------------------------------------+
 |LDAP_NO_DUOSEC_ATTR_VALUE="cn=posix_sysadmins"              | Will look for that attribute, to see if you should bypass Duo authentication|
-+------------------------------------------------------------+--------------------------------------------------+
-|LDAP_DUOSEC_ATTR="memberUid"                                | Will look for that value in the attribute.       |
-+------------------------------------------------------------+--------------------------------------------------+
++------------------------------------------------------------+-----------------------------------------------------------------------------+
+|LDAP_DUOSEC_ATTR="memberUid"                                | Will look for that value in the attribute.                                  |
++------------------------------------------------------------+-----------------------------------------------------------------------------+
 
 Misc scripts
 ~~~~~~~~~~~~

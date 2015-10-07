@@ -30,7 +30,7 @@ for cfg in cfg_path:
     except:
         pass
 
-if config == None:
+if config is None:
     print("Failed to load config")
     sys.exit(1)
 

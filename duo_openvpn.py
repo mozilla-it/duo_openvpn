@@ -20,7 +20,7 @@ for cfg in cfg_path:
         except:
             pass
 
-if config == None:
+if config is None:
     print("Failed to load config")
     sys.exit(1)
 
@@ -96,7 +96,7 @@ def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=Fa
 
 
 def ldap_auth(username, user_dn, password):
-    if (username == None) or (password == None) or (user_dn == None):
+    if (username is None) or (password is None) or (user_dn is None):
         log('User %s LDAP authentication failed' % username)
         return False
 
@@ -144,7 +144,7 @@ class DuoAPIAuth:
 
     def is_auth_cached(self):
         now = time.time()
-        if self.user_cache.has_key(self.username):
+        if self.username in self.user_cache:
             try:
                 tleft = self.user_cache[self.username]['timestamp']
                 ipaddr = self.user_cache[self.username]['ipaddr']
@@ -159,7 +159,7 @@ class DuoAPIAuth:
         # No IP? No cache for you.
         if self.client_ipaddr == '0.0.0.0':
             return
-        if self.cache_path == None:
+        if self.cache_path is None:
             return
         now = time.time()
         self.user_cache[self.username] = {'timestamp': now+self.user_cache_time, 'ipaddr': self.client_ipaddr}
@@ -246,7 +246,7 @@ def main():
     # this is the username as provided by the user - it cannot be trusted
     # we use it in case common_name is not present, or as password for OTP
     username_untrusted = os.environ.get('username')
-    if (username == None):
+    if username is None:
         username_untrusted = os.environ.get('username')
         username_trusted = False
     client_ipaddr = os.environ.get('untrusted_ip', '0.0.0.0')
@@ -255,7 +255,7 @@ def main():
     factor = None
 
     # Nope? then nope.
-    if (username == None or username == '') and (password == None or password == ''):
+    if (username is None or username == '') and (password is None or password == ''):
         log("User %s (%s) Missing username or password, (reported username may be None due to this)" % (username,
             client_ipaddr))
         return False
@@ -330,13 +330,13 @@ def main():
             log('User %s (%s) authentication failed, because ldap_auth() failed unexpectedly' % (username, client_ipaddr))
             return False
 
-        if config.TRY_LDAP_ONLY_AUTH_FIRST and password != None:
+        if config.TRY_LDAP_ONLY_AUTH_FIRST and password is not None:
             # If this works, we bail here
             if ldap_auth(username, user_dn, password):
                 return True
 
     try:
-        if factor != None and username_trusted:
+        if factor is not None and username_trusted:
             duo = DuoAPIAuth(config.IKEY, config.SKEY, config.HOST, username, client_ipaddr,
                              factor, passcode, config.USERNAME_HACK, config.FAIL_OPEN,
                              config.USER_CACHE_PATH, config.USER_CACHE_TIME)
@@ -351,7 +351,7 @@ def main():
 
 if __name__ == "__main__":
     control = os.environ.get('auth_control_file')
-    if control == None:
+    if control is None:
         log('No control file found, if using a deferred plugin authentication will stall and fail.')
 
     if main():

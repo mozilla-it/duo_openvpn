@@ -35,9 +35,15 @@ import cPickle as pickle
 if config.LDAP_CONTROL_BIND_DN:
     import ldap
 if config.USE_MOZDEF:
-    import mozdef
+    try:
+        import mozdef
+    except ImportError:
+        import mozdef_client as mozdef
 
-
+# The mozdef ("mozmsg") library can send to both MozDef and syslog. The syslog mode is a legacy option, hence the weird
+# looking checks below. Basically if USE_SYSLOG=True and USE_MOZDEF=True, this will send logs to both syslog and mozdef.
+# If only USE_MOZDEF=True this will send to mozdef only. If only USE_LEGACY_CEF is true this will send CEF over syslog
+# only.
 def log(msg):
     if not config.USE_LEGACY_CEF:
         mozmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['openvpn', 'duosecurity'])

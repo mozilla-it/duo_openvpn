@@ -4,7 +4,7 @@ git:
 language: python
 python:
   - "2.7"
-before-install:
+before_install:
   - sudo apt-get install build-essential
   - sudo apt-get install ruby-dev gcc make rpm
   - sudo gem install fpm

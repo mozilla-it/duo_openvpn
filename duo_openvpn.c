@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <signal.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <openvpn-plugin.h>
 
 struct context {

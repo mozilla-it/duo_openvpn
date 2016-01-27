@@ -6,7 +6,7 @@ python:
   - "2.7"
 before_install:
   - sudo apt-get install build-essential
-  - sudo apt-get install ruby-dev gcc make rpm
+  - sudo apt-get install ruby-dev gcc make rpm gem
   - sudo gem install fpm
 install:
   - pip install -r requirements.txt

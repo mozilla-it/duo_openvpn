@@ -8,7 +8,7 @@ before-install:
   - sudo apt-get install build-essential
 install:
   - pip install -r requirements.txt
-  - make install
+  - make DESTDIR=./travis install
   - make rpm
 script:
   - make

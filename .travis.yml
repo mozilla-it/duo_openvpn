@@ -6,6 +6,8 @@ python:
   - "2.7"
 before-install:
   - sudo apt-get install build-essential
+  - sudo apt-get install ruby-dev gcc make
+  - sudo gem install fpm
 install:
   - pip install -r requirements.txt
   - make DESTDIR=./travis install

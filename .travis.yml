@@ -3,18 +3,26 @@ git:
   submodules: true
 language: python
 python:
-  - "2.7"
+- '2.7'
 before_install:
-  - sudo apt-get install build-essential
-  - sudo apt-get install ruby-dev gcc make rpm gem
-  - sudo gem install fpm
+- sudo apt-get install build-essential
+- sudo apt-get install ruby-dev gcc make rpm rubygems
+- sudo gem install fpm
 install:
-  - pip install -r requirements.txt
-  - make DESTDIR=./travis install
-  - make rpm
+- pip install -r requirements.txt
+- make DESTDIR=./travis install
+- make rpm
 script:
-  - make
+- make
 notifications:
   email:
     on_success: never
     on_failure: never
+deploy:
+  key:
+    secure: ObTpqZB9wEK0u4ch+X0DF24YkwAjhjceVhOZDbC80uG/0hn5WRWk+Qw8GB1RoyUDT3yo7ttjTVHotJu+eiax/zBGZSdTZP9z0hccslc4uaGuqszsiol2LEoKTo1xwKTpXXcq2H2VkKDxy0/JBf5UbWfCP4c+v7QiXw8pfTKIa0K/eGJf/g5vy/94+RR/M6Jtb9RAgxk8PsAVfJyTDWqovpA06pl9HlfsPnYtKNEXPf3Pdj2TFRb9+H+67ZOueSqi2vC5BnZIIib5b/IgWE+KNFSyJISRZ2satXwf8d0bYnUxgrlBr/RQmKznS/5J99OJ5DYmLJ0yOPR7+ea5pYbjZUGC0jd+rMS4lWp2P02bvD3XmnvaFkOtQw6GTqR+SJ2fUe2SfGyydRXM0dD151unoaRKB7Qjo+BkoJ5s96BMaJl7zV7ID4jmuxsMndJ7Lrxih4I6hOEiLOA5e+fNDDDnQakyffAQo0nAk8no1hVJnPoo5bfKL2T1oDx6GoDFfWaNxp6s32giIZNhBUWGbyA5P49mdNUi2imnJtfLTFONv0+ud3QZJHvruH+nZZWCOuHNy/7phxGtLHzPneMWAw6DHqXOHSqW1mmYOs0tqju0o6gkyT7VnrecTDCrNFbfYqozFTInxC70YTrCH7XZ9r0WtRvMU4jlpWHSAUNCs8sG6vI=
+    provider: bintray
+    user: "gdestuynder"
+    on: master
+    file: "duo_openvpn-1.0.0-1.x86_64.rpm"
+    dry-run: "true"

@@ -51,6 +51,9 @@ def log(msg):
             mozmsg.sendToSyslog = True
         if not config.USE_MOZDEF:
             mozmsg.syslogOnly = True
+	if config.CA_PATH:
+	    mozmsg.verify_certificate = config.CA_PATH
+
         mozmsg.send(msg)
     else:
         msg = cef(msg)

@@ -13,6 +13,9 @@ USER_CACHE_PATH="/var/tmp/vpn_user_cache.pickle"
 USE_LEGACY_CEF=False
 USE_SYSLOG=True
 USE_MOZDEF=True
+#Path to your CA or CA bundle. This is particularly important on older deployments where python-requests may use an
+# outdated CA database
+CA_PATH=/etc/ssl/cert.pem
 
 MOZDEF_LOGGER='https://127.0.0.1:8080/events'
 USERNAME_HACK=True

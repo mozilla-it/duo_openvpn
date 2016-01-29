@@ -5,7 +5,7 @@ INSTALL	:= install
 DESTDIR	:= /
 PREFIX	:= /usr
 PACKAGE := duo_openvpn
-VERSION := 1.0.0
+VERSION := 1.0.2
 
 all: plugin
 	./setup.py build

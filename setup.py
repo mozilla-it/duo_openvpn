@@ -14,7 +14,7 @@ def read(fname):
 setup(
     name = "duo_openvpn",
         py_modules = ['duo_openvpn'],
-        version = "1.0.0",
+        version = "1.0.3",
         author = "Guillaume Destuynder",
         author_email = "gdestuynder@mozilla.com",
         description = ("A plugin to OpenVPN to use DuoSecurity and LDAP authentication"),

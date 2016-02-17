@@ -1,7 +1,7 @@
 %define		prefix	/usr
 
 Name:		duo_openvpn-mozilla	
-Version:	1.0		
+Version:	1.0.3
 Release:	1%{?dist}
 Packager:	Ed Lim <limed@mozilla.com>
 Summary:	Duo plugin for OpenVPN mozilla style

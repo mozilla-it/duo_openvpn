@@ -329,7 +329,7 @@ def main():
 
         try:
             if (uid in groups) or (username in groups) or (user_dn in groups):
-                log('Bypassing DuoSec authentication for user %s - using LDAP only instead (whitelisted)')
+                log('Bypassing DuoSec authentication for user %s (%s) - using LDAP only instead (whitelisted)' % (username, client_ipaddr))
                 return ldap_auth(username, user_dn, password)
         except:
             traceback.print_exc()

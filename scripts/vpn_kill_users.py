@@ -67,7 +67,7 @@ class vpnmgmt():
                 if fd == self.sock:
                     buf = self.sock.recv(1024)
                     data += buf
-            if buf == '' or data.find(stopon) != -1:
+            if buf == '' or stopon is not None and data.find(stopon) != -1:
                 break
         return data
 
@@ -127,3 +127,4 @@ if __name__ == "__main__":
                                 'user': user,
                                 'connected_since': vpn_status[user][2]})
         vpn.kill(user)
+

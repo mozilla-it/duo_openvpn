@@ -126,5 +126,4 @@ if __name__ == "__main__":
                        details={'srcip': vpn_status[user][0].split(':')[0],
                                 'user': user,
                                 'connected_since': vpn_status[user][2]})
-        vpn.kill(user)
-
+            vpn.kill(user)

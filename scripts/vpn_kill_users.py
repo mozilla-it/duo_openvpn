@@ -67,7 +67,7 @@ class vpnmgmt():
                 if fd == self.sock:
                     buf = self.sock.recv(1024)
                     data += buf
-            if buf == '' or data.find(stopon) != -1:
+            if buf == '' or stopon is not None and data.find(stopon) != -1:
                 break
         return data
 

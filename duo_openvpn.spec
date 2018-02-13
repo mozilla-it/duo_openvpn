@@ -1,17 +1,19 @@
+%define		debug_package %{nil}
 %define		prefix	/usr
+%define		shortname	duo_openvpn
 
-Name:		duo_openvpn-mozilla	
+Name:		%{shortname}-mozilla
 Version:	1.0.3
-Release:	1%{?dist}
-Packager:	Ed Lim <limed@mozilla.com>
-Summary:	Duo plugin for OpenVPN mozilla style
-	
-Group:		Utilities/Misc		
+Release:	2%{?dist}
+Packager:	Greg Cox <gcox@mozilla.com>
+Summary:	Duo plugin for OpenVPN Mozilla style
+
+Group:		Utilities/Misc
 License:	MPL
-URL:		https://duosecurity.com
-Source0:	duo_openvpn-mozilla-%{version}.tar.gz
-BuildRoot:  %{_tmppath}/%{name}-root
-Requires:	python, python-duo_client python-mozdef	
+URL:		https://github.com/mozilla-it/%{shortname}
+Source0:	https://github.com/mozilla-it/%{shortname}/archive/master.zip
+BuildRoot:	%(mktemp -ud %{_tmppath}/%{shortname}-%{version}-%{release}-XXXXXX)
+Requires:	python, python-duo_client python-mozdef_client
 
 %description
 Duo provides a simple two-factor as a service via:
@@ -26,8 +28,18 @@ This package provides the OpenVPN authentication plugin and scripts.
 However this package is created by Mozilla to enable extra LDAP lookups, and
 can also serve as an LDAP authentication plugin.
 
+%package utils
+Summary:        Utility scripts for %{name}
+Group:          Utilities/Misc
+License:        MPL
+Requires:       python-mozlibldap
+
+%description utils
+Scripts which are not essential for the core functioning of %{name}, but
+are helpful for humans who will interact with it.
+
 %prep
-%setup -q
+%setup -q -n %{shortname}-master
 
 %build
 make %{?_smp_mflags}
@@ -45,9 +57,19 @@ rm -rf %{buildroot}
 %{prefix}/lib/openvpn/plugins/duo_openvpn.so
 %{prefix}/lib/openvpn/plugins/duo_openvpn.py
 %{prefix}/lib/openvpn/plugins/duo_openvpn.pyc
-%{prefix}/lib/openvpn/plugins/duo_openvpn.pyo
+%exclude %{prefix}/lib/openvpn/plugins/duo_openvpn.pyo
 %attr(0644,root,root) %config(noreplace) %verify(not md5 size mtime)/etc/duo_openvpn.conf
 
+%files utils
+%defattr(0755,root,root)
+%{prefix}/lib/openvpn/plugins/vpn_kill_users.py
+%{prefix}/lib/openvpn/plugins/vpn_kill_users.pyc
+%exclude %{prefix}/lib/openvpn/plugins/vpn_kill_users.pyo
+
 %changelog
+* Mon Feb 12 2018 gcox <gcox@mozilla.com>
+    - Stop packaging .pyo because PEP 488
+    - Build based on a github checkout
+
 * Wed Apr 16 2014 Ed Lim <limed@mozilla.com>
 - Initial creation of spec file

@@ -4,7 +4,7 @@
 
 Name:		%{shortname}-mozilla
 Version:	1.0.3
-Release:	2%{?dist}
+Release:	3%{?dist}
 Packager:	Greg Cox <gcox@mozilla.com>
 Summary:	Duo plugin for OpenVPN Mozilla style
 
@@ -58,7 +58,7 @@ rm -rf %{buildroot}
 %{prefix}/lib/openvpn/plugins/duo_openvpn.py
 %{prefix}/lib/openvpn/plugins/duo_openvpn.pyc
 %exclude %{prefix}/lib/openvpn/plugins/duo_openvpn.pyo
-%attr(0644,root,root) %config(noreplace) %verify(not md5 size mtime)/etc/duo_openvpn.conf
+%attr(0600,root,root) %config(noreplace) %verify(not md5 size mtime)/etc/duo_openvpn.conf
 
 %files utils
 %defattr(0755,root,root)
@@ -67,6 +67,9 @@ rm -rf %{buildroot}
 %exclude %{prefix}/lib/openvpn/plugins/vpn_kill_users.pyo
 
 %changelog
+* Thu Mar  8 2018 gcox <gcox@mozilla.com>
+    - Better permissions on the file that could ostensibly contain passwords
+
 * Mon Feb 12 2018 gcox <gcox@mozilla.com>
     - Stop packaging .pyo because PEP 488
     - Build based on a github checkout

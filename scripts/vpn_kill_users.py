@@ -17,7 +17,7 @@
 import socket
 import mozlibldap
 import imp
-import mozdef
+import mozdef_client as mozdef
 import select
 import sys
 
@@ -29,13 +29,16 @@ for cfg in cfg_path:
         config = imp.load_source('config', cfg)
     except:
         pass
+    else:
+        # use first config file found
+        break
 
 if config is None:
     print("Failed to load config")
     sys.exit(1)
 
 # MozDef Logging
-mdmsg = mozdef.MozDefMsg(config.MOZDEF_HOST, tags=['openvpn', 'killusers'])
+mdmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['openvpn', 'killusers'])
 if config.USE_SYSLOG:
     mdmsg.sendToSyslog = True
 if not config.USE_MOZDEF:

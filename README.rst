@@ -88,11 +88,11 @@ The `/scripts` directory contains additional goodies.
 
 vpn_kill_users
 ===============
-If you use `reneg-sec 0` as setting so that OpenVPN does not renegociate (or renegociates very rarely should you use
+If you use `reneg-sec 0` as setting so that OpenVPN does not renegotiate (or renegotiates very rarely should you use
 another setting than 0 but that is still very high), you might still want to automatically disconnect users that you
 have disabled in LDAP.
 
-Run this in a crontab periodically, it'll pool for the users and kill em.
+Run this in a crontab periodically, it'll poll for the users and kill em.
 
 Recommended openvpn server settings:
 

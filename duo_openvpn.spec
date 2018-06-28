@@ -4,7 +4,7 @@
 
 Name:		%{shortname}-mozilla
 Version:	1.0.3
-Release:	3%{?dist}
+Release:	4%{?dist}
 Packager:	Greg Cox <gcox@mozilla.com>
 Summary:	Duo plugin for OpenVPN Mozilla style
 
@@ -32,7 +32,7 @@ can also serve as an LDAP authentication plugin.
 Summary:        Utility scripts for %{name}
 Group:          Utilities/Misc
 License:        MPL
-Requires:       python-mozlibldap
+Requires:       python, python-ldap
 
 %description utils
 Scripts which are not essential for the core functioning of %{name}, but

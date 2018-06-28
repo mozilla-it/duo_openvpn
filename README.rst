@@ -92,7 +92,7 @@ If you use `reneg-sec 0` as setting so that OpenVPN does not renegotiate (or ren
 another setting than 0 but that is still very high), you might still want to automatically disconnect users that you
 have disabled in LDAP.
 
-Run this in a crontab periodically, it'll poll for the users and kill em.
+Run this in a crontab periodically, it will poll for the users and kill them.
 
 Recommended openvpn server settings:
 
@@ -104,4 +104,4 @@ Recommended openvpn server settings:
 TODO
 ----
 
-- use mozlibldap for the duo script
+-- use mozlibldap for the duo script

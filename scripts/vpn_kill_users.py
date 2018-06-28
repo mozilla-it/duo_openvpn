@@ -16,7 +16,7 @@
 # management /var/run/openvpn-udp-stage.socket unix
 # management-client-group vpnmgmt
 
-import socket as socket_module
+import socket
 import imp
 import mozdef_client as mozdef
 import select
@@ -25,7 +25,7 @@ import ldap
 import re
 
 MINIMUM_LDAP_ACTIVE_USER_SIZE = 100
-# If you get fewer than ^ enabled-users, bail out.
+# If you get fewer than ^ allowed-users, bail out:
 # Do not try to disconnect any users.
 
 # FIXME: clean up positional args in format after we leave 2.6 behind
@@ -103,7 +103,7 @@ class ldap_searcher(object):
 
     def get_allowed_users(self):
         """
-        An enabled user is someone:
+        An allowed user is someone:
             whose account is enabled via ldap AND
             who is in the acl for minimum LDAP privs.
         Pull either, and they should be off VPN.
@@ -133,32 +133,32 @@ class vpnmgmt():
     """class vpnmgmt creates a socket to the openvpn management server"""
     def __init__(self, socket_path):
         try:
-            self.socket = socket_module.socket(socket_module.AF_UNIX,
-                                               socket_module.SOCK_STREAM)
+            self.sock = socket.socket(socket.AF_UNIX,
+                                      socket.SOCK_STREAM)
             self._connect(socket_path)
-            self.socket.setblocking(0)
+            self.sock.setblocking(0)
         except Exception, e:
-            print ('VPN setup failed: %s' % e)
+            print('VPN setup failed: %s' % e)
             sys.exit(3)
 
     def _connect(self, p):
-        self.socket.connect(p)
+        self.sock.connect(p)
         # get rid of the welcome msg
-        self.socket.recv(1024)
+        self.sock.recv(1024)
 
     def _send(self, command, stopon=None):
         # keep on reading until hitting timeout, in case the server is
         # being slow.  stopon is used to make this faster: you don't
         # need to wait for timeout if you know you already have the data.
         # Be careful that stopon doesn't match the data, though.
-        self.socket.send(command+'\r\n')
+        self.sock.send(command+'\r\n')
         data = ''
         while True:
-            r, w, e = select.select([0, self.socket], [], [], 1)
+            r, w, e = select.select([0, self.sock], [], [], 1)
             buf = ''
             for fd in r:
-                if fd == self.socket:
-                    buf = self.socket.recv(1024)
+                if fd == self.sock:
+                    buf = self.sock.recv(1024)
                     data += buf
             if buf == '' or stopon is not None and data.find(stopon) != -1:
                 break
@@ -180,7 +180,7 @@ class vpnmgmt():
             return data
 
         except Exception, e:
-            print ('Unable to get status: %s' % e)
+            print('Unable to get status: %s' % e)
             sys.exit(1)
 
     def getusers(self):
@@ -220,36 +220,36 @@ if __name__ == "__main__":
                       config.LDAP_BIND_DN,
                       config.LDAP_BIND_PASSWD)
 
-    enabled_users = l.get_allowed_users()
+    allowed_users = l.get_allowed_users()
 
-    # If there's a 'too small' set of enabled users (like,
+    # If there's a 'too small' set of allowed users (like,
     # from an ldap error), this could mean you could end up
     # with (example) 20 people connected, and 'a couple' of
-    # enabled users, and we'd cycle through and disconnect
+    # allowed users, and we'd cycle through and disconnect
     # everyone from VPN.  So enforce a minimum, and complain
     # if we're below that.
     #
     # This is a paranoid guess to say "if < some-reasonable-number"
-    # and to avoid saying "if no enabled users".  The aim is to
+    # and to avoid saying "if no allowed users".  The aim is to
     # cover off the case of "someone enforced an insane search limit",
     # which would pass a "we got SOMETHING back from the server"
     # while still being disastrous for user experience.
     #
-    if len(enabled_users) < MINIMUM_LDAP_ACTIVE_USER_SIZE:
+    if len(allowed_users) < MINIMUM_LDAP_ACTIVE_USER_SIZE:
         # msg = "LDAP returned fewer than {} users, aborting."
         msg = "LDAP returned fewer than {0} users, aborting."
-        print msg.format(MINIMUM_LDAP_ACTIVE_USER_SIZE)
+        print(msg.format(MINIMUM_LDAP_ACTIVE_USER_SIZE))
         sys.exit(1)
 
-    # enabled_users is a list of LDAP DNs at this point.
+    # allowed_users is a list of LDAP DNs at this point.
     # The email for ldap and the OpenVPN certificate CN
     # email/login name should match.
     #
     # This is an expensive loop to get users emails, sorry.
     # This is better than doing a comma-split on the DN.
     #
-    enabled_emails = [l.get_user_email(x)[0] for x in enabled_users]
-    # enabled_emails is the list of emails allowed to VPN.
+    allowed_emails = [l.get_user_email(x)[0] for x in allowed_users]
+    # allowed_emails is the list of emails allowed to VPN.
     # This SHOULD be also equal to the list of CNs allowed.
 
     users_connected_to_vpn = vpn.getusers()
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         # users' because disabled users would be a higher level ACL,
         # usually reserved for scripts running on the admin nodes.
         # But we checked for minimum-good user sets above.
-        if user not in enabled_emails:
+        if user not in allowed_emails:
             users_we_plan_to_disconnect.add(user)
 
     # If there's anyone to disconnect, time to kick them now.
@@ -273,7 +273,7 @@ if __name__ == "__main__":
         mdmsg.send(summary=msg.format(user),
                    details={'srcip': src_ip,
                             'user': user})
-        # print "disconnecting from VPN: {}".format(user)
-        print "disconnecting from VPN: {0}".format(user)
+        # print("disconnecting from VPN: {}".format(user))
+        print("disconnecting from VPN: {0}".format(user))
         vpn.kill(user)
 

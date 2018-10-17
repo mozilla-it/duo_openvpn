@@ -83,6 +83,7 @@ def ldap_get_dn(username):
 def ldap_attr_get(url, binddn, password, basedn, value_filter, attr, attr_key=False):
     conn = ldap.initialize(url)
     try:
+        conn.start_tls_s()
         conn.bind_s(binddn, password)
     except ldap.LDAPError, e:
         conn.unbind_s()

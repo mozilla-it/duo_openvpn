@@ -3,8 +3,8 @@
 %define		shortname	duo_openvpn
 
 Name:		%{shortname}-mozilla
-Version:	1.0.3
-Release:	4%{?dist}
+Version:	1.0.4
+Release:	1%{?dist}
 Packager:	Greg Cox <gcox@mozilla.com>
 Summary:	Duo authentication plugin for Mozilla-style OpenVPN
 

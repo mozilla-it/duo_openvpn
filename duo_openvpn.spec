@@ -6,14 +6,14 @@ Name:		%{shortname}-mozilla
 Version:	1.0.3
 Release:	4%{?dist}
 Packager:	Greg Cox <gcox@mozilla.com>
-Summary:	Duo plugin for OpenVPN Mozilla style
+Summary:	Duo authentication plugin for Mozilla-style OpenVPN
 
 Group:		Utilities/Misc
 License:	MPL
 URL:		https://github.com/mozilla-it/%{shortname}
 Source0:	https://github.com/mozilla-it/%{shortname}/archive/master.zip
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{shortname}-%{version}-%{release}-XXXXXX)
-Requires:	python, python-duo_client python-mozdef_client
+Requires:	python, python-duo_client python-mozdef_client, openvpn_defer_auth
 
 %description
 Duo provides a simple two-factor as a service via:
@@ -54,7 +54,6 @@ rm -rf %{buildroot}
 
 %files
 %defattr(0755,root,root)
-%{prefix}/lib/openvpn/plugins/duo_openvpn.so
 %{prefix}/lib/openvpn/plugins/duo_openvpn.py
 %{prefix}/lib/openvpn/plugins/duo_openvpn.pyc
 %exclude %{prefix}/lib/openvpn/plugins/duo_openvpn.pyo

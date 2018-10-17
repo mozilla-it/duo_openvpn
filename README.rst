@@ -37,14 +37,12 @@ Configuration
 
 C plugin
 ~~~~~~~~
-Call it from openvpn configuration with:
+You will very likely want a C plugin to integrate with openvpn.
 
-.. code::
+https://github.com/mozilla-it/openvpn_defer_auth
 
-   plugin /usr/lib/openvpn/plugins/duo_openvpn.so /usr/lib/openvpn/plugins/duo_openvpn.py
-
-This allow making a deferred call for authentication while using a script instead of blocking OpenVPN.
-This is needed as otherwise Duo will block OpenVPN while waiting for a push reply or OTP input.
+This allows making a deferred call-for-authentication while using a script.  This keeps openvpn from blocking
+while waiting for a push reply or OTP input.
 
 Python script
 ~~~~~~~~~~~~~

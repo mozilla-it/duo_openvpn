@@ -28,16 +28,6 @@ This package provides the OpenVPN authentication plugin and scripts.
 However this package is created by Mozilla to enable extra LDAP lookups, and
 can also serve as an LDAP authentication plugin.
 
-%package utils
-Summary:        Utility scripts for %{name}
-Group:          Utilities/Misc
-License:        MPL
-Requires:       python, python-ldap
-
-%description utils
-Scripts which are not essential for the core functioning of %{name}, but
-are helpful for humans who will interact with it.
-
 %prep
 %setup -q -n %{shortname}-master
 
@@ -58,12 +48,6 @@ rm -rf %{buildroot}
 %{prefix}/lib/openvpn/plugins/duo_openvpn.pyc
 %exclude %{prefix}/lib/openvpn/plugins/duo_openvpn.pyo
 %attr(0600,root,root) %config(noreplace) %verify(not md5 size mtime)/etc/duo_openvpn.conf
-
-%files utils
-%defattr(0755,root,root)
-%{prefix}/lib/openvpn/plugins/vpn_kill_users.py
-%{prefix}/lib/openvpn/plugins/vpn_kill_users.pyc
-%exclude %{prefix}/lib/openvpn/plugins/vpn_kill_users.pyo
 
 %changelog
 * Thu Mar  8 2018 gcox <gcox@mozilla.com>

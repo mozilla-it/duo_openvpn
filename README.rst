@@ -88,16 +88,7 @@ vpn_kill_users
 ===============
 If you use `reneg-sec 0` as setting so that OpenVPN does not renegotiate (or renegotiates very rarely should you use
 another setting than 0 but that is still very high), you might still want to automatically disconnect users that you
-have disabled in LDAP.
-
-Run this in a crontab periodically, it will poll for the users and kill them.
-
-Recommended openvpn server settings:
-
-.. code::
-
-   management /var/run/openvpn-udp-stage.socket unix
-   management-client-group vpnmgmt
+have disabled in LDAP.  Consider https://github.com/mozilla-it/vpn_kill_users
 
 TODO
 ----

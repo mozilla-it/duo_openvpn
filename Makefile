@@ -29,7 +29,6 @@ install:
 	mkdir -p $(DESTDIR)/etc/openvpn/
 	$(INSTALL) -m755 duo_openvpn.py $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 	$(INSTALL) -m600 duo_openvpn.conf.inc $(DESTDIR)/etc/duo_openvpn.conf
-	$(INSTALL) -m755 scripts/vpn_kill_users.py $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 
 clean:
 	rm -f *.pyc

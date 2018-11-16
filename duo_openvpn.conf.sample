@@ -1,0 +1,65 @@
+# Config file for duo_openvpn.py
+
+# Duo settings
+[duo-credentials]
+# You can add any fields from
+#   https://github.com/duosecurity/duo_client_python/blob/master/duo_client/client.py
+# Client.__init__.  
+#
+# Minimally this should be the IKEY/SKEY/HOST data relating to
+# your Duo connectivity.  Anything beyond those is Caveat Emptor.
+; IKEY =
+; SKEY =
+; HOST =
+
+
+[duo-behavior]
+# If FAIL_OPEN is set to True, then authentication will succeed when
+# communication with DuoAPI fails.
+fail_open = False
+#
+# If log_to_stdout is true, results will be printed to stdout.
+# This will 'clutter' the openvpn log file, but this adds real-time
+# coordinated results from Duo activity in the audit trail, for one-file
+# debugging.
+log_to_stdout = True
+
+
+[testing]
+# The 'testing' section contains information for the unit tests.
+# A production instance can/should empty this.
+#
+# This should be a valid user in your testing (someone who has a
+# Duo account and is enabled to log in.
+; normal_user = someone@company.com
+#
+# To test a user that is allowed to bypass Duo with just a password, include
+# that user and password here:
+; one_fa_user = some_bot
+; one_fa_pass = 12345
+#
+# This flag tells whether we wish testing to be exhaustive or not.
+# We have unit tests that do library checks for the above user,
+# for each function we define.  If you're doing a release, you may
+# care to do that.  But in the general case, testing every permutation
+# of the code is time-consuming overkill.
+#
+# deep_testing_rawauth tests the _auth code in duo_auth.  This is
+# a layer on top of duo_client.  The key here is to test the different
+# code paths that may come out of the library.  This is likely the
+# most interesting path (since it interfaces with an upstream library)
+# but is unlikely to change until that library changes.
+deep_testing_rawauth = True
+# 
+# deep_testing_mfa tests the _do_mfa_for_user code in duo_auth,  This
+# is a layer on top of _auth in that same file, which essentially turns
+# answers from _auth into True/False.  Since that function is pretty
+# simple, this iteration of testing is likely overkill.
+deep_testing_mfa = True
+#
+# deep_testing_mainauth tests the main_auth code in duo_auth.  This
+# code combines _preauth (which we test because it can be done without
+# interactivity) with _do_mfa_for_user, which is explained above.
+# Overall, this is important mostly because it is the place where we
+# publicly interface, but it is also trivially visually auditable.
+deep_testing_mainauth = True

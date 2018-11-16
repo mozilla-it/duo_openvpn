@@ -1,3 +1,12 @@
+# Our config file:
+duo_openvpn.conf
+# RPMs that get built
+duo_openvpn-mozilla-*.noarch.rpm
+python-duo-openvpn-mozilla-*.noarch.rpm
+# The upstream library config file, just in case we're testing locally.
+iamvpnlibrary.conf
+mozdef_client_config.conf
+
 # from https://github.com/github/gitignore/blob/master/Python.gitignore
 # Byte-compiled / optimized / DLL files
 __pycache__/

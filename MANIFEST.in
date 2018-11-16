@@ -1,6 +1,0 @@
-include README.rst
-include requirements.txt
-include AUTHORS.rst
-include LICENSE
-include duo_openvpn.conf.inc
-recursive-include scripts *

@@ -265,6 +265,11 @@ class DuoAPIAuth(duo_client.Auth):
         if not self._preflight():
             # Failed preflight - there's no connection to Duo.
             # Fail safe / fail secure.
+            if self._fail_open:
+                self.log(summary='Duo failed open, user allowed in',
+                         severity='CRITICAL',
+                         details={'user': self.user_config.username,
+                                  'client_ip': self.user_config.client_ipaddr},)
             return self._fail_open
 
         preauth = self._preauth()

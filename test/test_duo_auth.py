@@ -447,6 +447,5 @@ class TestDuoAPIAuth(unittest.TestCase):
         # the function and making sure it doesn't raise.
         tmplibrary = DuoAPIAuth(log_func=self.main_object.log,
                                 **self.main_object.duo_client_args)
-        tmplibrary.log(summary='test message',
-                       severity='DEBUG',
-                       details={'test': 1})
+        tmplibrary.log(summary='TEST message',
+                       severity='DEBUG',)

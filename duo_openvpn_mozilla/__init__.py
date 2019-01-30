@@ -97,10 +97,13 @@ class DuoOpenVPN(object):
             This segment sends a log to mozdef for important events.
         """
         logger = mozdef_client_config.ConfigedMozDefEvent()
-        logger.tags = ['openvpn', 'duosecurity']
+        logger.category = 'Authentication'
+        logger.source = 'openvpn'
+        logger.tags = ['vpn', 'duosecurity']
         logger.summary = summary
-        if severity is not None:
-            logger.set_severity_from_string(severity)
+        if severity is None:
+            severity = 'INFO'
+        logger.set_severity_from_string(severity)
         if details is not None:
             logger.details = details
         logger.send()
@@ -132,10 +135,12 @@ class DuoOpenVPN(object):
             # Here we have a user not allowed to VPN in at all.
             # This is some form of "their account is disabled" and/or
             # they aren't in the approved ACL list.
-            self.log(summary='User administratively denied',
+            self.log(summary=('FAIL: VPN user "{}" administratively '
+                              'denied'.format(username)),
                      severity='INFO',
-                     details={'user': username,
-                              'client_ip': client_ipaddr},)
+                     details={'username': username,
+                              'sourceipaddress': client_ipaddr,
+                              'success': 'false', },)
             return False
 
         if not iam_searcher.does_user_require_vpn_mfa(username):
@@ -153,14 +158,15 @@ class DuoOpenVPN(object):
                                                                     password)
 
             if allow_1fa:
-                summary = 'non-MFA user with accepted password'
+                summary = 'SUCCESS: non-MFA user "{}" accepted by password'
             else:
-                summary = 'non-MFA user with denied password'
+                summary = 'FAIL: non-MFA user "{}" denied by password'
 
-            self.log(summary=summary,
+            self.log(summary=summary.format(username),
                      severity='INFO',
-                     details={'user': username,
-                              'client_ip': client_ipaddr},)
+                     details={'username': username,
+                              'sourceipaddress': client_ipaddr,
+                              'success': str(allow_1fa).lower(), },)
             return allow_1fa
 
         # We don't establish a Duo object until we need it.
@@ -175,15 +181,20 @@ class DuoOpenVPN(object):
         except:  # pylint: disable=bare-except
             # Deliberately catch all errors until we can find what can
             # go wrong.
-            self.log(summary='User authentication failed, software bug',
+            self.log(summary='FAIL: VPN User auth failed, software bug',
                      severity='ERROR',
-                     details={'user': username,
-                              'client_ip': client_ipaddr},)
+                     details={'username': username,
+                              'error': 'true',
+                              'sourceipaddress': client_ipaddr,
+                              'success': 'false', },)
             traceback.print_exc()
             return False
 
         # We should never get here.
-        self.log(summary='User fell through all Duo checks, software bug',
+        self.log(summary='FAIL: VPN User fell through all possible '
+                         'Duo checks, software bug',
                  severity='ERROR',
-                 details={'user': username})
+                 details={'username': username,
+                          'error': 'true',
+                          'success': 'false', },)
         return False

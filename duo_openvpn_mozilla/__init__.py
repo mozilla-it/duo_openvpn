@@ -174,7 +174,13 @@ class DuoOpenVPN(object):
                          log_func=self.log,
                          **self.duo_client_args)
 
-        duo.load_user_to_verify(user_config=user_data)
+        if not duo.load_user_to_verify(user_config=user_data):
+            self.log(summary='FAIL: VPN user failed MFA pre-load',
+                     severity='INFO',
+                     details={'username': username,
+                              'sourceipaddress': client_ipaddr,
+                              'success': 'false', },)
+            return False
 
         try:
             return duo.main_auth()

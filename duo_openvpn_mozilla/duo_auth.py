@@ -53,9 +53,11 @@ class DuoAPIAuth(duo_client.Auth):
         # All we're doing is verifying that this object looks 'close.'
         # Full evaluation is another function's job.
         try:
-            if not isinstance(user_config.username, str):
+            if not isinstance(user_config.username, basestring):
                 return False
-            if not isinstance(user_config.factor, str):
+            if not isinstance(user_config.factor, basestring):
+                # Something with a None for a factor is not going to be
+                # able to MFA.
                 return False
         except AttributeError:
             return False

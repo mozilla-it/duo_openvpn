@@ -45,6 +45,8 @@ class TestOpenVPNCredentials(unittest.TestCase):  # pylint:  disable=too-many-pu
         """ without env vars at all, we fail noisily """
         with self.assertRaises(ValueError):
             self.library.load_variables_from_environment()
+        self.assertFalse(self.library.is_valid(),
+                         'object.is_valid must be false if load fails')
 
     def test_openvpnredentials_02(self):
         """ common_name-only fails """
@@ -55,6 +57,31 @@ class TestOpenVPNCredentials(unittest.TestCase):  # pylint:  disable=too-many-pu
             self.library.load_variables_from_environment()
         self.assertFalse(self.library.is_valid(),
                          'object.is_valid must be false if load fails')
+
+    def test_openvpnredentials_11(self):
+        """ common_name ok and no secondary credentials """
+        # A bad user: someone passed in nothing
+        os.environ['common_name'] = self.realish_user
+        os.environ['username'] = ''
+        os.environ['password'] = ''
+        with self.assertRaises(ValueError):
+            self.library.load_variables_from_environment()
+        self.assertFalse(self.library.is_valid(),
+                         'object.is_valid must be false if load fails')
+
+    def test_openvpnredentials_12(self):
+        """ common_name ok and bad secondary credentials """
+        # A bad user: someone passed in a weird word
+        _stupid_password = 'ppuusshh'  # a typo of 'push'?
+        os.environ['common_name'] = self.realish_user
+        os.environ['username'] = _stupid_password
+        os.environ['password'] = ''
+        self.library.load_variables_from_environment()
+        self.assertTrue(self.library.is_valid())
+        self.assertEquals(self.library.username, self.realish_user)
+        self.assertEquals(self.library.password, _stupid_password)
+        self.assertEquals(self.library.passcode, None)
+        self.assertEquals(self.library.factor, None)
 
     def test_openvpnredentials_13(self):
         """ common_name and good passcode works """
@@ -72,26 +99,28 @@ class TestOpenVPNCredentials(unittest.TestCase):  # pylint:  disable=too-many-pu
     def test_openvpnredentials_14(self):
         """ common_name, username, and no passcode fails """
         # Here someone comes in without a passcode or password.
-        # Die peacefully.
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = self.realish_user
         os.environ['password'] = ''
-        with self.assertRaises(ValueError):
-            self.library.load_variables_from_environment()
-        self.assertFalse(self.library.is_valid(),
-                         'object.is_valid must be false if load fails')
+        self.library.load_variables_from_environment()
+        self.assertTrue(self.library.is_valid())
+        self.assertEquals(self.library.username, self.realish_user)
+        self.assertEquals(self.library.password, self.realish_user)
+        self.assertEquals(self.library.passcode, None)
+        self.assertEquals(self.library.factor, None)
 
     def test_openvpnredentials_15(self):
         """ common_name, bad passcode as a username fails """
         # Here someone puts in a junk passcode in the user field
-        # Die peacefully.
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = self.bad_passcode
         os.environ['password'] = ''
-        with self.assertRaises(ValueError):
-            self.library.load_variables_from_environment()
-        self.assertFalse(self.library.is_valid(),
-                         'object.is_valid must be false if load fails')
+        self.library.load_variables_from_environment()
+        self.assertTrue(self.library.is_valid())
+        self.assertEquals(self.library.username, self.realish_user)
+        self.assertEquals(self.library.password, self.bad_passcode)
+        self.assertEquals(self.library.passcode, None)
+        self.assertEquals(self.library.factor, None)
 
     def test_openvpnredentials_16(self):
         """ common_name, good passcode as a username works """

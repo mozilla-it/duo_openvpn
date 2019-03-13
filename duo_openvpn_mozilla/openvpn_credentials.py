@@ -106,29 +106,16 @@ class OpenVPNCredentials(object):
             # This stems back from
             # https://github.com/mozilla-it/duo_openvpn/pull/8
             # h/t emorley
-            if ((__unsafe_username is not None) and
-                    (self.is_a_passcode(__unsafe_username) or
-                     __unsafe_username in self.__class__.DUO_RESERVED_WORDS)):
-                # If the 'username' that someone entered is a passcode
-                # then we do some gymnastics to sort the variables out.
+            if (__unsafe_username is None or __unsafe_username == ''):
+                # This should never happen, as we filter this case in an
+                # earlier stanza, but just in case...
+                raise ValueError('No password/passcode was sent')  # pragma: no cover
+            else:
+                # Here we shuffle the 'username' to the password area.
+                # This makes us do searching on the credentials in
+                # the next clause.
                 __password = __unsafe_username
                 __unsafe_username = ''
-            else:
-                # NOTE! We are into a code path that essentially springs
-                # from a one-off user PR.  We're into a terminal else
-                # clause because I can't think of what else would be
-                # a valid answer here.  There might be a case where the
-                # other valid password/passcode methods are interesting,
-                # but nobody has asked for them, so, for code simplicity
-                # we're not doing that.
-                #
-                # We have no passcode/password sent in.  Give up.
-                #
-                # Pedantic note, the error message is that we didn't
-                # have a password, which is true.  That we couldn't
-                # save them is the true issue in this branch, but it all
-                # points back to the user not filling out user/pass correctly.
-                raise ValueError('No password/passcode was sent')
 
         # CAUTION: We ass-u-me that nobody has a real password that is
         # among the Duo reserved words.  If they do, well... that's going

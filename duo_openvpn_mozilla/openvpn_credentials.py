@@ -58,9 +58,9 @@ class OpenVPNCredentials(object):
 
     def load_variables_from_environment(self):
         """
-            We raise if there's a horrific/no-environment-set state,
-            because that means we're criminally broken.
-            else we set .valid and let 'is_valid()' tell of our failure.
+            This function reads in the environmental variables
+            and begins to make decisions about them, validating the inputs to
+            set up for how we will authenticate the user.
         """
         # the environmental variable 'common_name' is what's attached to the
         # certificate of the user.  The cert's common_name is trusted.
@@ -79,41 +79,32 @@ class OpenVPNCredentials(object):
         # it cannot be trusted for authentication.
         # We're going to call it the unsafe username, just to be clear.
         __unsafe_username = os.environ.get('username')
+        if __unsafe_username is None:
+            __unsafe_username = ''
 
         # the environmental variable 'password' is what they typed in/sent.
         __password = os.environ.get('password')
+        if __password is None:
+            __password = ''
 
-        if ((__unsafe_username is None or __unsafe_username == '') and
-                (__password is None or __password == '')):
-            # We didn't get user-or-password.  This is not strictly fatal
-            # in a single-factor world, but we're bombing out early because
-            # a real client ought to be providing some info to us in our
-            # MFA world (exempted clients never get here), and we're going
-            # to fail them later anyway because there's no credentials to
-            # validate.
+        if __unsafe_username != '' and __password == '':
+            # At this step, we have a username of some sort, but no password.
             #
-            # Pedantic note, the error message here is 'user/pass' - we
-            # only NEED one of them, technically, but it's nice to have both.
-            raise ValueError('Must provide user/pass credentials')
-
-        if __password is None or __password == '':
             # Based on changes dating back to 2015, as an aid to
-            # user-experience, we allow using username-as-password.
+            # user-experience, we allow using username-as-passcode.
             # Useful if you paste a pw in your login, to login faster.
-            # Apparently some clients don't let you only save your login
-            # and re-enter the "password" every time.
+            # Apparently some clients don't let you only save your
+            # login and re-enter the "password" every time.
             #
             # This stems back from
             # https://github.com/mozilla-it/duo_openvpn/pull/8
             # h/t emorley
-            if (__unsafe_username is None or __unsafe_username == ''):
-                # This should never happen, as we filter this case in an
-                # earlier stanza, but just in case...
-                raise ValueError('No password/passcode was sent')  # pragma: no cover
-            else:
-                # Here we shuffle the 'username' to the password area.
-                # This makes us do searching on the credentials in
-                # the next clause.
+            #
+            # Here we shuffle the 'username' to the password area.
+            # This makes us do searching on the credentials in
+            # the next clause.
+            if (self.is_a_passcode(__unsafe_username) or
+                    __unsafe_username in self.__class__.DUO_RESERVED_WORDS):
                 __password = __unsafe_username
                 __unsafe_username = ''
 
@@ -166,6 +157,9 @@ class OpenVPNCredentials(object):
             elif __password.find(':') != -1:
                 # This goes back to the age-old convention of sending in
                 # password:RSAcode.
+                #
+                # CAUTION: this effectively prohibits 'hunter2:123456' as
+                # a user's password.
                 __tmplist = __password.split(':')
                 __tmp = __tmplist.pop()
                 if self.is_a_passcode(__tmp):

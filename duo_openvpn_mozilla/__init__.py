@@ -122,13 +122,31 @@ class DuoOpenVPN(object):
         """
         # Set up a user object based on the environmental variables.
         user_data = OpenVPNCredentials()
-        user_data.load_variables_from_environment()
-        if not user_data.is_valid():
+        try:
+            user_data.load_variables_from_environment()
+        except ValueError:
+            # This happens when we have a total mismatch, like, openvpn
+            # didn't send valid environmental variables to the plugin,
+            # or someone got here without a certificate(!?!)
+            self.log(summary='FAIL: VPN environmental load, software bug',
+                     severity='ERROR',
+                     details={'error': 'true',
+                              'success': 'false', },)
+            traceback.print_exc()
             return False
 
         username = user_data.username
         client_ipaddr = user_data.client_ipaddr
         password = user_data.password
+
+        if not user_data.is_valid():
+            self.log(summary=('FAIL: VPN user "{}" provided no '
+                              'credentials'.format(username)),
+                     severity='INFO',
+                     details={'username': username,
+                              'sourceipaddress': client_ipaddr,
+                              'success': 'false', },)
+            return False
 
         iam_searcher = iamvpnlibrary.IAMVPNLibrary()
         if not iam_searcher.user_allowed_to_vpn(username):

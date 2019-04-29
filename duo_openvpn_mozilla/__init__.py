@@ -76,7 +76,7 @@ class DuoOpenVPN(object):
         """
         if conf_file is None:
             conf_file = self.__class__.CONFIG_FILE_LOCATIONS
-        if isinstance(conf_file, basestring):
+        if not isinstance(conf_file, list):
             conf_file = [conf_file]
         config = ConfigParser()
         for filename in conf_file:

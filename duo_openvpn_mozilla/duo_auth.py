@@ -20,6 +20,7 @@
 # Contributors: gdestuynder@mozilla.com
 import sys
 import socket
+import six
 import duo_client
 sys.dont_write_bytecode = True
 
@@ -53,9 +54,9 @@ class DuoAPIAuth(duo_client.Auth):
         # All we're doing is verifying that this object looks 'close.'
         # Full evaluation is another function's job.
         try:
-            if not isinstance(user_config.username, basestring):
+            if not isinstance(user_config.username, six.string_types):
                 return False
-            if not isinstance(user_config.factor, basestring):
+            if not isinstance(user_config.factor, six.string_types):
                 # Something with a None for a factor is not going to be
                 # able to MFA.
                 return False

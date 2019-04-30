@@ -105,13 +105,20 @@ class TestDuoAPIAuth(unittest.TestCase):
                          'for junk input')
 
     def test_load_user_to_verify_01(self):
-        """ load_user_to_verify can fail for a bad user """
+        """ load_user_to_verify can fail for a bad username """
         setattr(self.user_data['push'], 'username', 0)
         res = self.library.load_user_to_verify(self.user_data['push'])
         self.assertFalse(res, 'load_user_to_verify must be False '
-                         'for a bad user')
+                         'for a bad username')
 
     def test_load_user_to_verify_02(self):
+        """ load_user_to_verify can fail for a bad factor """
+        setattr(self.user_data['push'], 'factor', 0)
+        res = self.library.load_user_to_verify(self.user_data['push'])
+        self.assertFalse(res, 'load_user_to_verify must be False '
+                         'for a bad factor')
+
+    def test_load_user_to_verify_03(self):
         """ load_user_to_verify can succeed and return True """
         res = self.library.load_user_to_verify(self.user_data['push'])
         self.assertTrue(res, 'load_user_to_verify must be True')
@@ -126,7 +133,7 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def test_preflight_02(self):
         """ preflight fails for bad skey """
-        if not self.deep_test_rawauth:
+        if not self.deep_test_rawauth:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         self.main_object.duo_client_args['skey'] = 'wrong-passcode'
         tmplibrary = DuoAPIAuth(**self.main_object.duo_client_args)
@@ -222,7 +229,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         return False
 
     def _auth_testing_run(self, testcase, answer):
-        if not self.deep_test_rawauth:
+        if not self.deep_test_rawauth:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
@@ -239,7 +246,7 @@ class TestDuoAPIAuth(unittest.TestCase):
                          '_auth result must be "{ans}"'.format(ans=answer))
 
     def _mfa_testing_run(self, testcase, answer):
-        if not self.deep_test_mfa:
+        if not self.deep_test_mfa:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
@@ -278,7 +285,7 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def test_auth_06(self):
         """ _auth with VALID PASSCODE """
-        if not self.deep_test_rawauth:
+        if not self.deep_test_rawauth:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         passcode = raw_input('enter a valid passcode: ')
         os.environ['password'] = passcode
@@ -289,7 +296,7 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def test_mfa_06(self):
         """ _auth with VALID PASSCODE """
-        if not self.deep_test_mfa:
+        if not self.deep_test_mfa:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         passcode = raw_input('enter a valid passcode: ')
         os.environ['password'] = passcode
@@ -370,6 +377,18 @@ class TestDuoAPIAuth(unittest.TestCase):
         self.assertFalse(res, 'main_auth with junk factor '
                          'must return False')
 
+    def test_main_01(self):
+        """ main_auth with no connection goes fail_open """
+        self.main_object.duo_client_args['host'] = 'badhost'
+        for state in (True, False):
+            tmplibrary = DuoAPIAuth(fail_open=state,
+                                    **self.main_object.duo_client_args)
+            tmplibrary.load_user_to_verify(self.user_data['auto'])
+            res = tmplibrary.main_auth()
+            self.assertEqual(res, state,
+                             'main_auth with no connection must return '
+                             'the fail_open state')
+
     def test_main_02(self):
         """ main_auth with sms fails """
         self.library.load_user_to_verify(self.user_data['sms'])
@@ -379,7 +398,7 @@ class TestDuoAPIAuth(unittest.TestCase):
                          'must return False')
 
     def _main_testing_run(self, testcase, answer):
-        if not self.deep_test_main:
+        if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
@@ -406,7 +425,7 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def test_main_06(self):
         """ _auth with VALID PASSCODE """
-        if not self.deep_test_main:
+        if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         passcode = raw_input('enter a valid passcode: ')
         os.environ['password'] = passcode

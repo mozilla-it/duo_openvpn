@@ -26,9 +26,11 @@ sys.dont_write_bytecode = True
 try:
     # 2.7's module:
     from ConfigParser import SafeConfigParser as ConfigParser
-except ImportError:
+    from ConfigParser import NoOptionError, NoSectionError
+except ImportError:  # pragma: no cover
     # 3's module:
     from configparser import ConfigParser
+    from configparser import NoOptionError, NoSectionError
 
 
 class DuoOpenVPN(object):
@@ -51,11 +53,10 @@ class DuoOpenVPN(object):
         for key, val in self.configfile.items('duo-credentials'):
             duo_client_args[key] = val
         self.duo_client_args = duo_client_args
-        if (self.configfile.has_section('duo-behavior') and
-                self.configfile.has_option('duo-behavior', 'fail_open')):
+        try:
             self.failopen = self.configfile.getboolean('duo-behavior',
                                                        'fail_open')
-        else:
+        except (NoOptionError, NoSectionError):  # pragma: no cover
             # Fail secure if they can't tell us otherwise.
             self.failopen = False
         # We use mozdef to log about activities.  However, for triage,
@@ -63,11 +64,10 @@ class DuoOpenVPN(object):
         # mozdef can do syslog, but that is a separate file from the vpn's
         # activity log.  So, to put it all in one place, we can log to
         # stdout.
-        if (self.configfile.has_section('duo-behavior') and
-                self.configfile.has_option('duo-behavior', 'log_to_stdout')):
+        try:
             self.log_to_stdout = self.configfile.getboolean('duo-behavior',
                                                             'log_to_stdout')
-        else:
+        except (NoOptionError, NoSectionError):  # pragma: no cover
             self.log_to_stdout = True
 
     def _ingest_config_from_file(self, conf_file=None):
@@ -76,7 +76,7 @@ class DuoOpenVPN(object):
         """
         if conf_file is None:
             conf_file = self.__class__.CONFIG_FILE_LOCATIONS
-        if not isinstance(conf_file, list):
+        elif not isinstance(conf_file, list):  # pragma: no cover
             conf_file = [conf_file]
         config = ConfigParser()
         for filename in conf_file:
@@ -84,11 +84,13 @@ class DuoOpenVPN(object):
                 try:
                     config.read(filename)
                     break
-                except:  # pylint: disable=bare-except
+                except:  # pragma: no cover  pylint: disable=bare-except
                     # This bare-except is due to 2.7
                     # limitations in configparser.
                     pass
-        else:
+        else:  # pragma: no cover
+            # We deliberately fail out here rather than try to
+            # exit gracefully, because we are severely misconfig'ed.
             raise IOError('Config file not found')
         return config
 
@@ -101,8 +103,6 @@ class DuoOpenVPN(object):
         logger.source = 'openvpn'
         logger.tags = ['vpn', 'duosecurity']
         logger.summary = summary
-        if severity is None:
-            severity = 'INFO'
         logger.set_severity_from_string(severity)
         if details is not None:
             logger.details = details
@@ -110,7 +110,8 @@ class DuoOpenVPN(object):
         # Print to stdout here because we want a local copy of the results.
         # We could log to syslog, but that separates our files from the
         # openvpn log to syslog.
-        if self.log_to_stdout:
+        if self.log_to_stdout:  # pragma: no cover
+            # Most test cases are quiet / nonprinting
             print logger.syslog_convert()
 
     def main_authentication(self):  # pylint: disable=too-many-return-statements
@@ -124,7 +125,7 @@ class DuoOpenVPN(object):
         user_data = OpenVPNCredentials()
         try:
             user_data.load_variables_from_environment()
-        except ValueError:
+        except ValueError:  # pragma: no cover
             # This happens when we have a total mismatch, like, openvpn
             # didn't send valid environmental variables to the plugin,
             # or someone got here without a certificate(!?!)
@@ -138,15 +139,6 @@ class DuoOpenVPN(object):
         username = user_data.username
         client_ipaddr = user_data.client_ipaddr
         password = user_data.password
-
-        if not user_data.is_valid():
-            self.log(summary=('FAIL: VPN user "{}" provided no '
-                              'credentials'.format(username)),
-                     severity='INFO',
-                     details={'username': username,
-                              'sourceipaddress': client_ipaddr,
-                              'success': 'false', },)
-            return False
 
         iam_searcher = iamvpnlibrary.IAMVPNLibrary()
         if not iam_searcher.user_allowed_to_vpn(username):
@@ -192,7 +184,11 @@ class DuoOpenVPN(object):
                          log_func=self.log,
                          **self.duo_client_args)
 
-        if not duo.load_user_to_verify(user_config=user_data):
+        if not duo.load_user_to_verify(user_config=user_data):  # pragma: no cover
+            # The load_user_to_verify method is benign, so we should
+            # never fail to load, but if we do it'll be hard to find,
+            # so this 'if' block captures an edge case we've never seen,
+            # just in case.
             self.log(summary='FAIL: VPN user failed MFA pre-load',
                      severity='INFO',
                      details={'username': username,
@@ -202,7 +198,7 @@ class DuoOpenVPN(object):
 
         try:
             return duo.main_auth()
-        except:  # pylint: disable=bare-except
+        except Exception:  # pragma: no cover  pylint: disable=broad-except
             # Deliberately catch all errors until we can find what can
             # go wrong.
             self.log(summary='FAIL: VPN User auth failed, software bug',
@@ -220,5 +216,5 @@ class DuoOpenVPN(object):
                  severity='ERROR',
                  details={'username': username,
                           'error': 'true',
-                          'success': 'false', },)
-        return False
+                          'success': 'false', },)  # pragma: no cover
+        return False  # pragma: no cover

@@ -16,6 +16,12 @@ sys.path.insert(1, 'mozdef_client')
 sys.path.insert(1, 'mozdef_client_config')
 from duo_openvpn_mozilla import DuoOpenVPN  # pylint: disable=wrong-import-position
 sys.dont_write_bytecode = True
+try:
+    # 2.7's module:
+    from ConfigParser import NoOptionError, NoSectionError
+except ImportError:  # pragma: no cover
+    # 3's module:
+    from configparser import NoOptionError, NoSectionError
 
 
 class TestDuoOpenVPN(unittest.TestCase):
@@ -34,11 +40,10 @@ class TestDuoOpenVPN(unittest.TestCase):
         self.main_object = DuoOpenVPN()
         self.normal_user = self.main_object.configfile.get(
             'testing', 'normal_user')
-        if self.main_object.configfile.has_option('testing',
-                                                  'deep_testing_mainauth'):
+        try:
             self.deep_test_main = self.main_object.configfile.getboolean(
                 'testing', 'deep_testing_mainauth')
-        else:
+        except (NoOptionError, NoSectionError):  # pragma: no cover
             self.deep_test_main = False
         #
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
@@ -69,15 +74,29 @@ class TestDuoOpenVPN(unittest.TestCase):
         res = library.main_authentication()
         self.assertFalse(res, 'invalid users must be denied')
 
+    def test_1fa_user_attempts_2fa(self):
+        """ A 1FA user trying to 2FA fails """
+        # This is a weird test that stems from a 1FA user pretending to
+        # have a Duo.
+        try:
+            one_fa_user = self.main_object.configfile.get('testing',
+                                                          'one_fa_user')
+        except (NoOptionError, NoSectionError):  # pragma: no cover
+            return self.skipTest('No testing/one_fa_user defined')
+        os.environ['common_name'] = one_fa_user
+        os.environ['password'] = 'push'
+        library = DuoOpenVPN()
+        library.log_to_stdout = False
+        res = library.main_authentication()
+        self.assertFalse(res, '1fa user attempting to 2fa must be denied')
+
     def test_1fa_user_bad_pw(self):
         """ A 1FA user with a bad password fails """
-        if not self.main_object.configfile.has_section('testing'):
-            return self.skipTest('No testing section defined')
-        if not self.main_object.configfile.has_option('testing',
-                                                      'one_fa_user'):
+        try:
+            one_fa_user = self.main_object.configfile.get('testing',
+                                                          'one_fa_user')
+        except (NoOptionError, NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
-        one_fa_user = self.main_object.configfile.get('testing',
-                                                      'one_fa_user')
         os.environ['common_name'] = one_fa_user
         os.environ['password'] = 'a-bad-password'
         library = DuoOpenVPN()
@@ -87,18 +106,16 @@ class TestDuoOpenVPN(unittest.TestCase):
 
     def test_1fa_user_good_pw(self):
         """ A 1FA user with a good password works """
-        if not self.main_object.configfile.has_section('testing'):
-            return self.skipTest('No testing section defined')
-        if not self.main_object.configfile.has_option('testing',
-                                                      'one_fa_user'):
+        try:
+            one_fa_user = self.main_object.configfile.get('testing',
+                                                          'one_fa_user')
+        except (NoOptionError, NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
-        one_fa_user = self.main_object.configfile.get('testing',
-                                                      'one_fa_user')
-        if not self.main_object.configfile.has_option('testing',
-                                                      'one_fa_pass'):
+        try:
+            one_fa_pass = self.main_object.configfile.get('testing',
+                                                          'one_fa_pass')
+        except (NoOptionError, NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_pass defined')
-        one_fa_pass = self.main_object.configfile.get('testing',
-                                                      'one_fa_pass')
         os.environ['common_name'] = one_fa_user
         os.environ['password'] = one_fa_pass
         library = DuoOpenVPN()
@@ -108,7 +125,7 @@ class TestDuoOpenVPN(unittest.TestCase):
 
     def test_2fa_user_bad(self):
         """ A 2FA user with a bad push fails  PLEASE DENY """
-        if not self.deep_test_main:
+        if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'
@@ -119,7 +136,7 @@ class TestDuoOpenVPN(unittest.TestCase):
 
     def test_2fa_user_good(self):
         """ A 2FA user with a bad push fails  PLEASE ALLOW """
-        if not self.deep_test_main:
+        if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'

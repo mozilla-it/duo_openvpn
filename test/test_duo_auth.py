@@ -165,15 +165,16 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def test_preauth_03(self):
         """ preauth wants to enroll for unknown users """
-        setattr(self.user_data['push'], 'username', 'baduser')
+        setattr(self.user_data['push'], 'username', 'baddie-bad-username')
         self.library.load_user_to_verify(self.user_data['push'])
         res = self.library._preauth()
         self.assertIsInstance(res, dict,
                               '_preauth returns a dict upon success')
         self.assertIn('result', res,
                       '_preauth return must have a "result" key')
-        self.assertEqual(res['result'], 'enroll',
-                         '_preauth for an unknown person must return "enroll"')
+        self.assertIn(res['result'], ['deny','enroll'],
+                      ('_preauth for an unknown user '
+                       'must return "deny" or "enroll"'))
 
     def test_preauth_04(self):
         """ preauth wants to auth standard user """

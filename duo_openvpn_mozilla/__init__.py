@@ -140,7 +140,17 @@ class DuoOpenVPN(object):
         client_ipaddr = user_data.client_ipaddr
         password = user_data.password
 
-        iam_searcher = iamvpnlibrary.IAMVPNLibrary()
+        try:
+            iam_searcher = iamvpnlibrary.IAMVPNLibrary()
+        except RuntimeError:  # pragma: no cover
+            # Couldn't connect to the IAM service:
+            self.log(summary=('FAIL: Unable to connect to IAM'),
+                     severity='INFO',
+                     details={'username': username,
+                              'sourceipaddress': client_ipaddr,
+                              'success': 'false', },)
+            return False
+
         if not iam_searcher.user_allowed_to_vpn(username):
             # Here we have a user not allowed to VPN in at all.
             # This is some form of "their account is disabled" and/or

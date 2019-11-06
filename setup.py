@@ -54,7 +54,7 @@ setup(
     url="https://github.com/mozilla-it/duo_openvpn",
     long_description=open('README.rst').read(),
     install_requires=[
-        'iamvpnlibrary>=0.8.2',
+        'iamvpnlibrary>=0.10.0',
         'mozdef-client-config',
         'duo_client>=3.3.0',
     ],

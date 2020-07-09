@@ -3,23 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
 """ duo_auth class unit test script """
-# This test file is all about calling protected methods on the
-# library's files, so, we tell pylint that we're cool with it:
-# pylint: disable=protected-access
 
 import unittest
 import os
-import sys
-sys.path.insert(1, 'duo_client')
-sys.path.insert(1, 'duo_openvpn_mozilla')
-sys.path.insert(1, 'iamvpnlibrary')
-sys.path.insert(1, 'mozdef_client')
-sys.path.insert(1, 'mozdef_client_config')
-import duo_client  # pylint: disable=wrong-import-position
-from duo_auth import DuoAPIAuth  # pylint: disable=wrong-import-position
-from openvpn_credentials import OpenVPNCredentials  # pylint: disable=wrong-import-position
-from duo_openvpn_mozilla import DuoOpenVPN  # pylint: disable=wrong-import-position
-sys.dont_write_bytecode = True
+import test.context  # pylint: disable=unused-import
+import duo_client
+from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
+from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
+from duo_openvpn_mozilla import DuoOpenVPN
 
 
 class TestDuoAPIAuth(unittest.TestCase):
@@ -172,7 +163,7 @@ class TestDuoAPIAuth(unittest.TestCase):
                               '_preauth returns a dict upon success')
         self.assertIn('result', res,
                       '_preauth return must have a "result" key')
-        self.assertIn(res['result'], ['deny','enroll'],
+        self.assertIn(res['result'], ['deny', 'enroll'],
                       ('_preauth for an unknown user '
                        'must return "deny" or "enroll"'))
 

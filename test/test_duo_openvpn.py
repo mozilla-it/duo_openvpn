@@ -3,19 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
 """ duo_openvpn_mozilla class unit test script """
-# This test file is all about calling protected methods on the
-# library files, so, we tell pylint that we're cool with it:
-# pylint: disable=protected-access
 
 import unittest
 import os
-import sys
-sys.path.insert(1, 'duo_client')
-sys.path.insert(1, 'iamvpnlibrary')
-sys.path.insert(1, 'mozdef_client')
-sys.path.insert(1, 'mozdef_client_config')
-from duo_openvpn_mozilla import DuoOpenVPN  # pylint: disable=wrong-import-position
-sys.dont_write_bytecode = True
+import test.context  # pylint: disable=unused-import
+from duo_openvpn_mozilla import DuoOpenVPN
 try:
     # 2.7's module:
     from ConfigParser import NoOptionError, NoSectionError

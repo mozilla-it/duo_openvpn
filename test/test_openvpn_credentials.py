@@ -1,19 +1,13 @@
-#!/usr/bin/env python
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
 """ openvpnredentials class unit test script """
-# This test file is all about calling protected methods on the
-# library files, so, we tell pylint that we're cool with it:
-# pylint: disable=protected-access
 
 import unittest
 import os
-import sys
-sys.path.insert(1, 'duo_openvpn_mozilla')
-from openvpn_credentials import OpenVPNCredentials  # pylint: disable=wrong-import-position
-sys.dont_write_bytecode = True
+import test.context  # pylint: disable=unused-import
+from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 
 
 class CredentialsTestMixin(object):

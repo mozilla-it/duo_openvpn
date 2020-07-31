@@ -9,11 +9,9 @@ import os
 import test.context  # pylint: disable=unused-import
 from duo_openvpn_mozilla import DuoOpenVPN
 try:
-    # 2.7's module:
-    from ConfigParser import NoOptionError, NoSectionError
+    import configparser
 except ImportError:  # pragma: no cover
-    # 3's module:
-    from configparser import NoOptionError, NoSectionError
+    from six.moves import configparser
 
 
 class TestDuoOpenVPN(unittest.TestCase):
@@ -35,7 +33,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         try:
             self.deep_test_main = self.main_object.configfile.getboolean(
                 'testing', 'deep_testing_mainauth')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             self.deep_test_main = False
         #
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
@@ -73,7 +71,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         try:
             one_fa_user = self.main_object.configfile.get('testing',
                                                           'one_fa_user')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
         os.environ['common_name'] = one_fa_user
         os.environ['password'] = 'push'
@@ -87,7 +85,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         try:
             one_fa_user = self.main_object.configfile.get('testing',
                                                           'one_fa_user')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
         os.environ['common_name'] = one_fa_user
         os.environ['password'] = 'a-bad-password'
@@ -101,12 +99,12 @@ class TestDuoOpenVPN(unittest.TestCase):
         try:
             one_fa_user = self.main_object.configfile.get('testing',
                                                           'one_fa_user')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
         try:
             one_fa_pass = self.main_object.configfile.get('testing',
                                                           'one_fa_pass')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             return self.skipTest('No testing/one_fa_pass defined')
         os.environ['common_name'] = one_fa_user
         os.environ['password'] = one_fa_pass

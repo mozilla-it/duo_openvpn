@@ -99,7 +99,7 @@ class DuoOpenVPN(object):
             This segment sends a log to mozdef for important events.
         """
         logger = mozdef_client_config.ConfigedMozDefEvent()
-        logger.category = 'Authentication'
+        logger.category = 'authentication'
         logger.source = 'openvpn'
         logger.tags = ['vpn', 'duosecurity']
         logger.summary = summary

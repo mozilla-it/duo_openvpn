@@ -94,10 +94,10 @@ class X2LoadEnvAwful(CredentialsTestMixin, unittest.TestCase):
         os.environ['common_name'] = self.realish_user
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, '')
-        self.assertEquals(self.library.passcode, None)
-        self.assertEquals(self.library.factor, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, '')
+        self.assertEqual(self.library.passcode, None)
+        self.assertEqual(self.library.factor, None)
 
 
 class X4LoadEnvNormal(CredentialsTestMixin, unittest.TestCase):
@@ -117,10 +117,10 @@ class X4LoadEnvNormal(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = self.realish_passcode
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
 
 # Below here, we bypass the environmental stuff and pass arguments,
@@ -151,10 +151,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = ''
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, '')
-        self.assertEquals(self.library.passcode, None)
-        self.assertEquals(self.library.factor, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, '')
+        self.assertEqual(self.library.passcode, None)
+        self.assertEqual(self.library.factor, None)
 
     def test_loadvar_01(self):
         """ user '' pass DUO_RESERVED_WORDS """
@@ -164,10 +164,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = wordp
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, None)
-            self.assertEquals(self.library.passcode, None)
-            self.assertEquals(self.library.factor, wordp)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
+            self.assertEqual(self.library.passcode, None)
+            self.assertEqual(self.library.factor, wordp)
 
     def test_loadvar_02(self):
         """ user '' pass a_passcode """
@@ -177,10 +177,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_03(self):
         """ user '' pass passcode:a_passcode """
@@ -190,10 +190,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_04(self):
         """ user '' pass passcode:not_a_passcode """
@@ -203,11 +203,11 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
         # Note that this is deliberate:
-        self.assertEquals(self.library.passcode, self.bad_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.passcode, self.bad_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_05(self):
         """ user '' pass a_password:a_passcode """
@@ -218,10 +218,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, _rawpass)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, _rawpass)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_06(self):
         """ user '' pass a_pa:ss:wo:rd """
@@ -231,10 +231,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, _pass)
-        self.assertEquals(self.library.passcode, None)
-        self.assertEquals(self.library.factor, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, _pass)
+        self.assertEqual(self.library.passcode, None)
+        self.assertEqual(self.library.factor, None)
 
     def test_loadvar_07(self):
         """ user '' pass a_password """
@@ -244,10 +244,10 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, _pass)
-        self.assertEquals(self.library.passcode, None)
-        self.assertEquals(self.library.factor, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, _pass)
+        self.assertEqual(self.library.passcode, None)
+        self.assertEqual(self.library.factor, None)
 
     ############################################################################3
 
@@ -262,10 +262,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = ''
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, None)
-            self.assertEquals(self.library.passcode, None)
-            self.assertEquals(self.library.factor, wordu)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
+            self.assertEqual(self.library.passcode, None)
+            self.assertEqual(self.library.factor, wordu)
 
     def test_loadvar_11(self):
         """ user DUO_RESERVED_WORDS pass DUO_RESERVED_WORDS """
@@ -276,10 +276,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
                 os.environ['password'] = wordp
                 self.library.load_variables_from_environment()
                 self.assertTrue(self.library.is_valid())
-                self.assertEquals(self.library.username, self.realish_user)
-                self.assertEquals(self.library.password, None)
-                self.assertEquals(self.library.passcode, None)
-                self.assertEquals(self.library.factor, wordp)
+                self.assertEqual(self.library.username, self.realish_user)
+                self.assertEqual(self.library.password, None)
+                self.assertEqual(self.library.passcode, None)
+                self.assertEqual(self.library.factor, wordp)
 
     def test_loadvar_12(self):
         """ user DUO_RESERVED_WORDS pass a_passcode """
@@ -290,10 +290,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = _pass
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, None)
-            self.assertEquals(self.library.passcode, self.realish_passcode)
-            self.assertEquals(self.library.factor, 'passcode')
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
+            self.assertEqual(self.library.passcode, self.realish_passcode)
+            self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_13(self):
         """ user DUO_RESERVED_WORDS pass passcode:a_passcode """
@@ -304,10 +304,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = _pass
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, None)
-            self.assertEquals(self.library.passcode, self.realish_passcode)
-            self.assertEquals(self.library.factor, 'passcode')
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
+            self.assertEqual(self.library.passcode, self.realish_passcode)
+            self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_14(self):
         """ user DUO_RESERVED_WORDS pass passcode:not_a_passcode """
@@ -318,11 +318,11 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = _pass
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, None)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
             # Note that this is deliberate:
-            self.assertEquals(self.library.passcode, self.bad_passcode)
-            self.assertEquals(self.library.factor, 'passcode')
+            self.assertEqual(self.library.passcode, self.bad_passcode)
+            self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_15(self):
         """ user DUO_RESERVED_WORDS pass a_password:a_passcode """
@@ -334,10 +334,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = _pass
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, _rawpass)
-            self.assertEquals(self.library.passcode, self.realish_passcode)
-            self.assertEquals(self.library.factor, 'passcode')
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, _rawpass)
+            self.assertEqual(self.library.passcode, self.realish_passcode)
+            self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_16(self):
         """ user DUO_RESERVED_WORDS pass a_pa:ss:wo:rd """
@@ -348,10 +348,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = _pass
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, _pass)
-            self.assertEquals(self.library.passcode, None)
-            self.assertEquals(self.library.factor, None)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, _pass)
+            self.assertEqual(self.library.passcode, None)
+            self.assertEqual(self.library.factor, None)
 
     def test_loadvar_17(self):
         """ user DUO_RESERVED_WORDS pass a_password """
@@ -362,10 +362,10 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = _pass
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, _pass)
-            self.assertEquals(self.library.passcode, None)
-            self.assertEquals(self.library.factor, None)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, _pass)
+            self.assertEqual(self.library.passcode, None)
+            self.assertEqual(self.library.factor, None)
 
     ############################################################################3
 
@@ -395,10 +395,10 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         else:  # pragma: no cover
             # If we loaded, we need to check this out:
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, '')
-            self.assertEquals(self.library.passcode, None)
-            self.assertEquals(self.library.factor, None)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, '')
+            self.assertEqual(self.library.passcode, None)
+            self.assertEqual(self.library.factor, None)
 
     def test_loadvar_21(self):
         """ user someuser pass DUO_RESERVED_WORDS """
@@ -408,10 +408,10 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
             os.environ['password'] = wordp
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
-            self.assertEquals(self.library.username, self.realish_user)
-            self.assertEquals(self.library.password, None)
-            self.assertEquals(self.library.passcode, None)
-            self.assertEquals(self.library.factor, wordp)
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
+            self.assertEqual(self.library.passcode, None)
+            self.assertEqual(self.library.factor, wordp)
 
     def test_loadvar_22(self):
         """ user someuser pass a_passcode """
@@ -421,10 +421,10 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_23(self):
         """ user someuser pass passcode:a_passcode """
@@ -434,10 +434,10 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_24(self):
         """ user someuser pass passcode:not_a_passcode """
@@ -447,11 +447,11 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
         # Note that this is deliberate:
-        self.assertEquals(self.library.passcode, self.bad_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.passcode, self.bad_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_25(self):
         """ user someuser pass a_password:a_passcode """
@@ -462,10 +462,10 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, _rawpass)
-        self.assertEquals(self.library.passcode, self.realish_passcode)
-        self.assertEquals(self.library.factor, 'passcode')
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, _rawpass)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_26(self):
         """ user someuser pass a_pa:ss:wo:rd """
@@ -475,10 +475,10 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, _pass)
-        self.assertEquals(self.library.passcode, None)
-        self.assertEquals(self.library.factor, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, _pass)
+        self.assertEqual(self.library.passcode, None)
+        self.assertEqual(self.library.factor, None)
 
     def test_loadvar_27(self):
         """ user someuser pass a_password """
@@ -488,7 +488,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         os.environ['password'] = _pass
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
-        self.assertEquals(self.library.username, self.realish_user)
-        self.assertEquals(self.library.password, _pass)
-        self.assertEquals(self.library.passcode, None)
-        self.assertEquals(self.library.factor, None)
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, _pass)
+        self.assertEqual(self.library.passcode, None)
+        self.assertEqual(self.library.factor, None)

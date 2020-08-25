@@ -76,11 +76,9 @@ class DuoOpenVPN(object):
                 try:
                     config.read(filename)
                     break
-                except:  # pragma: no cover  pylint: disable=bare-except
-                    # This bare-except is due to 2.7
-                    # limitations in configparser.
+                except (configparser.Error):
                     pass
-        else:  # pragma: no cover
+        else:
             # We deliberately fail out here rather than try to
             # exit gracefully, because we are severely misconfig'ed.
             raise IOError('Config file not found')
@@ -102,8 +100,7 @@ class DuoOpenVPN(object):
         # Print to stdout here because we want a local copy of the results.
         # We could log to syslog, but that separates our files from the
         # openvpn log to syslog.
-        if self.log_to_stdout:  # pragma: no cover
-            # Most test cases are quiet / nonprinting
+        if self.log_to_stdout:
             print(logger.syslog_convert())
 
     def main_authentication(self):  # pylint: disable=too-many-return-statements
@@ -117,7 +114,7 @@ class DuoOpenVPN(object):
         user_data = OpenVPNCredentials()
         try:
             user_data.load_variables_from_environment()
-        except ValueError:  # pragma: no cover
+        except ValueError:
             # This happens when we have a total mismatch, like, openvpn
             # didn't send valid environmental variables to the plugin,
             # or someone got here without a certificate(!?!)
@@ -134,7 +131,7 @@ class DuoOpenVPN(object):
 
         try:
             iam_searcher = iamvpnlibrary.IAMVPNLibrary()
-        except RuntimeError:  # pragma: no cover
+        except RuntimeError:
             # Couldn't connect to the IAM service:
             self.log(summary=('FAIL: Unable to connect to IAM'),
                      severity='INFO',
@@ -186,7 +183,7 @@ class DuoOpenVPN(object):
                          log_func=self.log,
                          **self.duo_client_args)
 
-        if not duo.load_user_to_verify(user_config=user_data):  # pragma: no cover
+        if not duo.load_user_to_verify(user_config=user_data):
             # The load_user_to_verify method is benign, so we should
             # never fail to load, but if we do it'll be hard to find,
             # so this 'if' block captures an edge case we've never seen,
@@ -200,7 +197,7 @@ class DuoOpenVPN(object):
 
         try:
             return duo.main_auth()
-        except Exception:  # pragma: no cover  pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             # Deliberately catch all errors until we can find what can
             # go wrong.
             self.log(summary='FAIL: VPN User auth failed, software bug',
@@ -211,12 +208,3 @@ class DuoOpenVPN(object):
                               'success': 'false', },)
             traceback.print_exc()
             return False
-
-        # We should never get here.
-        self.log(summary='FAIL: VPN User fell through all possible '
-                         'Duo checks, software bug',
-                 severity='ERROR',
-                 details={'username': username,
-                          'error': 'true',
-                          'success': 'false', },)  # pragma: no cover
-        return False  # pragma: no cover

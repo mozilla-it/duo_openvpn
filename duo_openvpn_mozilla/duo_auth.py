@@ -33,14 +33,14 @@ class DuoAPIAuth(duo_client.Auth):
         This is more or less a recreation on top of duo_client
         with some extra logging for us.
     """
-    def __init__(self, fail_open=False, log_func=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
             Hidden in args/kwargs is that we accept all the features that
             would be passed along to duo_client.Auth for init.
         """
         self.hostname = socket.gethostname()
-        self._fail_open = fail_open
-        self.log_func = log_func
+        self._fail_open = kwargs.pop('fail_open', False)
+        self.log_func = kwargs.pop('log_func', None)
         self.user_config = None
 
         super(DuoAPIAuth, self).__init__(*args, **kwargs)
@@ -94,7 +94,7 @@ class DuoAPIAuth(duo_client.Auth):
             # See if we have valid keys to use on the server.
             # https://duo.com/docs/authapi#/check
             self.check()  # parent-call
-        except socket.error as err:  # pragma: no cover
+        except socket.error as err:
             # Super unlikely.  Ping should've hit this.
             self.log(summary='FAIL: DuoAPIAuth check socket {}'.format(err),
                      details={'error': 'true',
@@ -191,7 +191,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return None
-        elif self.user_config.factor == 'phone':  # pragma: no cover
+        elif self.user_config.factor == 'phone':
             # This code path exists only for completeness.  The only way
             # you get here is if someone puts in the password as 'phone',
             # which we don't advertise.  But, in any case, do what they ask,
@@ -213,7 +213,7 @@ class DuoAPIAuth(duo_client.Auth):
         try:
             # https://duo.com/docs/authapi#/auth
             res = self.auth(**passing_args)  # parent-call
-        except socket.error as err:  # pragma: no cover
+        except socket.error as err:
             # Super unlikely.  Ping should've hit this.
             self.log(summary='FAIL: DuoAPIAuth auth '
                              'socket-failed {}'.format(err),
@@ -221,7 +221,7 @@ class DuoAPIAuth(duo_client.Auth):
                               'success': 'false', },
                      severity='CRITICAL')
             return None
-        except RuntimeError as err:  # pragma: no cover
+        except RuntimeError as err:
             # This is when the call returns a 400.for bad parameters.
             # This is hard to simulate, as we pre-massage the parameters
             # that go into an auth call, so any failure here is hard to test.
@@ -249,8 +249,7 @@ class DuoAPIAuth(duo_client.Auth):
             # A None coming back at us, we can do nothing with.
             # Trust that auth did some logging for us and quit here.
             return False
-        elif (not isinstance(res, dict) or
-              ('result' not in res)):  # pragma:  no cover
+        if (not isinstance(res, dict) or ('result' not in res)):
             # This should never happen.  This is a supreme failure
             # in code testing.
             self.log(summary='FAIL: User auth failed, software bug',
@@ -261,7 +260,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return False
-        elif res['result'] == 'allow':
+        if res['result'] == 'allow':
             _summary = ('SUCCESS: User "{user}" authenticated by DuoAPIAuth'
                         '').format(user=self.user_config.username)
             self.log(summary=_summary,
@@ -272,18 +271,17 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'true', },)
             return True
-        else:
-            _summary = ('FAIL: User "{user}" denied by DuoAPIAuth: '
-                        '{msg}').format(user=self.user_config.username,
-                                        msg=res['status_msg'])
-            self.log(summary=_summary,
-                     severity='WARNING',
-                     details={
-                         'username': self.user_config.username,
-                         'duofactor': self.user_config.factor,
-                         'sourceipaddress': self.user_config.client_ipaddr,
-                         'success': 'false', },)
-            return False
+        _summary = ('FAIL: User "{user}" denied by DuoAPIAuth: '
+                    '{msg}').format(user=self.user_config.username,
+                                    msg=res['status_msg'])
+        self.log(summary=_summary,
+                 severity='WARNING',
+                 details={
+                     'username': self.user_config.username,
+                     'duofactor': self.user_config.factor,
+                     'sourceipaddress': self.user_config.client_ipaddr,
+                     'success': 'false', },)
+        return False
 
     def main_auth(self):
         # pylint: disable=too-many-return-statements
@@ -301,7 +299,6 @@ class DuoAPIAuth(duo_client.Auth):
             # Failed preflight - there's no connection to Duo.
             # Fail safe / fail secure.
             if self._fail_open:
-                # No coverage because it's only a log, and only if we fail open
                 self.log(summary=('SUCCESS: Duo failed open, '
                                   'user "{}" allowed '
                                   'in'.format(self.user_config.username)),
@@ -316,8 +313,7 @@ class DuoAPIAuth(duo_client.Auth):
 
         preauth = self._preauth()
 
-        if preauth is None:  # pragma: no cover
-            # Not covered, because it's an unsimulatable API failure.
+        if preauth is None:
             # A failure at this point means something failed in _preauth.
             # We explicitly need to fail here.  If it's because we lost
             # the connection, it's okay.  On the next connection, fail_open
@@ -334,9 +330,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return False
-        elif (not isinstance(preauth, dict) or
-              ('result' not in preauth)):  # pragma: no cover
-            # Not covered, because it's an unsimulatable API failure.
+        if (not isinstance(preauth, dict) or ('result' not in preauth)):
             self.log(summary='FAIL: User got a non-dict preauth '
                              'reply, software bug',
                      severity='ERROR',
@@ -346,7 +340,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return False
-        elif preauth['result'] == 'allow':  # pragma: no cover
+        if preauth['result'] == 'allow':
             # This is a somewhat unexpected case, as it is someonw who
             # would check in with Duo, yet be allowed in without doing
             # a MFA proof.  We must return True since they're approved,
@@ -359,7 +353,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'true', },)
             return True
-        elif preauth['result'] == 'enroll':  # pragma: no cover
+        if preauth['result'] == 'enroll':
             # We do not have a user that needs enrolling, to test against.
             # The key here is, this must return False to indicate a failed
             # login attempt.
@@ -373,7 +367,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return False
-        elif preauth['result'] == 'deny':  # pragma: no cover
+        if preauth['result'] == 'deny':
             # We do not have a perpetually-locked-out user to test against.
             # The key here is, this must return False to indicate a failed
             # login attempt.
@@ -385,7 +379,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return False
-        elif preauth['result'] == 'auth':
+        if preauth['result'] == 'auth':
             # An MFA user.  Time to go to work.
             # This is the main use case of this 'if' cascade, and the only
             # one we are likely to ever encounter.
@@ -399,17 +393,14 @@ class DuoAPIAuth(duo_client.Auth):
             # Skip logging here, as the subfunction has the answers
             # and will log when it gets answers
             return self._do_mfa_for_user()
-        else:  # pragma: no cover
-            # The reply from Duo is unknown.  Probably an API changed.
-            # Since this is a failure from Duo, we do not code-cover this
-            # since it would be almost impossible to simulate.
-            _summary = ('FAIL: Unexpected result from DuoAPIAuth: '
-                        '{msg}').format(msg=preauth['result'])
-            self.log(summary=_summary,
-                     severity='ERROR',
-                     details={
-                         'username': self.user_config.username,
-                         'error': 'true',
-                         'sourceipaddress': self.user_config.client_ipaddr,
-                         'success': 'false', },)
-            return False
+        # The reply from Duo is unknown.  Probably an API changed.
+        _summary = ('FAIL: Unexpected result from DuoAPIAuth: '
+                    '{msg}').format(msg=preauth['result'])
+        self.log(summary=_summary,
+                 severity='ERROR',
+                 details={
+                     'username': self.user_config.username,
+                     'error': 'true',
+                     'sourceipaddress': self.user_config.client_ipaddr,
+                     'success': 'false', },)
+        return False

@@ -24,13 +24,9 @@ from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 sys.dont_write_bytecode = True
 try:
-    # 2.7's module:
-    from ConfigParser import SafeConfigParser as ConfigParser
-    from ConfigParser import NoOptionError, NoSectionError
+    import configparser
 except ImportError:  # pragma: no cover
-    # 3's module:
-    from configparser import ConfigParser
-    from configparser import NoOptionError, NoSectionError
+    from six.moves import configparser
 
 
 class DuoOpenVPN(object):
@@ -56,7 +52,7 @@ class DuoOpenVPN(object):
         try:
             self.failopen = self.configfile.getboolean('duo-behavior',
                                                        'fail_open')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             # Fail secure if they can't tell us otherwise.
             self.failopen = False
         # We use mozdef to log about activities.  However, for triage,
@@ -67,19 +63,15 @@ class DuoOpenVPN(object):
         try:
             self.log_to_stdout = self.configfile.getboolean('duo-behavior',
                                                             'log_to_stdout')
-        except (NoOptionError, NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             self.log_to_stdout = True
 
-    def _ingest_config_from_file(self, conf_file=None):
+    def _ingest_config_from_file(self):
         """
             pull in config variables from a system file
         """
-        if conf_file is None:
-            conf_file = self.__class__.CONFIG_FILE_LOCATIONS
-        elif not isinstance(conf_file, list):  # pragma: no cover
-            conf_file = [conf_file]
-        config = ConfigParser()
-        for filename in conf_file:
+        config = configparser.ConfigParser()
+        for filename in self.__class__.CONFIG_FILE_LOCATIONS:
             if os.path.isfile(filename):
                 try:
                     config.read(filename)
@@ -112,7 +104,7 @@ class DuoOpenVPN(object):
         # openvpn log to syslog.
         if self.log_to_stdout:  # pragma: no cover
             # Most test cases are quiet / nonprinting
-            print logger.syslog_convert()
+            print(logger.syslog_convert())
 
     def main_authentication(self):  # pylint: disable=too-many-return-statements
         """

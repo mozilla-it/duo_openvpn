@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """
     This script handles the direct integration with openvpn's
     auth_control_file / OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY
@@ -62,5 +62,5 @@ def main():
     # we wrote out in the try, so we're done.
     sys.exit(0)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

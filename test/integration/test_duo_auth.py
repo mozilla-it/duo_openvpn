@@ -2,15 +2,21 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
-""" duo_auth class unit test script """
+""" duo_auth class integration script """
 
 import unittest
 import os
 import test.context  # pylint: disable=unused-import
+import mock
+import six
 import duo_client
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN
+try:
+    import configparser
+except ImportError:  # pragma: no cover
+    from six.moves import configparser
 
 
 class TestDuoAPIAuth(unittest.TestCase):
@@ -24,16 +30,32 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ Preparing test rig """
         # To get a decent test, we're going to need items from the config
         # file in order to test.
-        self.main_object = DuoOpenVPN()
+        with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
+                               new=['duo_openvpn.conf',
+                                    '/usr/local/etc/duo_openvpn.conf',
+                                    '/etc/openvpn/duo_openvpn.conf',
+                                    '/etc/duo_openvpn.conf']):
+            self.main_object = DuoOpenVPN()
         self.main_object.log_to_stdout = False
-        self.normal_user = self.main_object.configfile.get(
-            'testing', 'normal_user')
-        self.deep_test_rawauth = self.main_object.configfile.getboolean(
-            'testing', 'deep_testing_rawauth')
-        self.deep_test_mfa = self.main_object.configfile.getboolean(
-            'testing', 'deep_testing_mfa')
-        self.deep_test_main = self.main_object.configfile.getboolean(
-            'testing', 'deep_testing_mainauth')
+        try:
+            self.normal_user = self.main_object.configfile.get('testing', 'normal_user')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            return self.skipTest('No testing/normal_user defined')
+        try:
+            self.deep_test_rawauth = self.main_object.configfile.getboolean(
+                'testing', 'deep_testing_rawauth')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            self.deep_test_rawauth = False
+        try:
+            self.deep_test_mfa = self.main_object.configfile.getboolean(
+                'testing', 'deep_testing_mfa')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            self.deep_test_mfa = False
+        try:
+            self.deep_test_main = self.main_object.configfile.getboolean(
+                'testing', 'deep_testing_mainauth')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            self.deep_test_main = False
         #
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = self.normal_user
@@ -279,7 +301,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_rawauth:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
-        passcode = raw_input('enter a valid passcode: ')
+        passcode = six.moves.input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
@@ -290,7 +312,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_mfa:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
-        passcode = raw_input('enter a valid passcode: ')
+        passcode = six.moves.input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
@@ -327,7 +349,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_rawauth:
         #     return self.skipTest('because of .deep_testing preference')
-        # passcode = raw_input('enter an invalid passcode: ')
+        # passcode = six.moves.input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -341,7 +363,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_mfa:
         #     return self.skipTest('because of .deep_testing preference')
-        # passcode = raw_input('enter an invalid passcode: ')
+        # passcode = six.moves.input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -419,7 +441,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
-        passcode = raw_input('enter a valid passcode: ')
+        passcode = six.moves.input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
@@ -444,7 +466,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_main:
         #     return self.skipTest('because of .deep_testing preference')
-        # passcode = raw_input('enter an invalid passcode: ')
+        # passcode = six.moves.input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()

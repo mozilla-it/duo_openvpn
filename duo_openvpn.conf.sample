@@ -26,7 +26,7 @@ log_to_stdout = True
 
 
 [testing]
-# The 'testing' section contains information for the unit tests.
+# The 'testing' section contains information for the integration tests.
 # A production instance can/should empty this.
 #
 # This should be a valid user in your testing (someone who has a

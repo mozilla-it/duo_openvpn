@@ -2,11 +2,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
-""" duo_openvpn_mozilla class unit test script """
+""" duo_openvpn_mozilla class integration script """
 
 import unittest
 import os
 import test.context  # pylint: disable=unused-import
+import mock
 from duo_openvpn_mozilla import DuoOpenVPN
 try:
     import configparser
@@ -27,14 +28,29 @@ class TestDuoOpenVPN(unittest.TestCase):
         # test class.  As such, we don't have a good setup here.
         # Each test will have to do a lot of situational setup.
         # That said, we make a garbage object just to get our library read:
-        self.main_object = DuoOpenVPN()
-        self.normal_user = self.main_object.configfile.get(
-            'testing', 'normal_user')
+        with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
+                               new=['duo_openvpn.conf',
+                                    '/usr/local/etc/duo_openvpn.conf',
+                                    '/etc/openvpn/duo_openvpn.conf',
+                                    '/etc/duo_openvpn.conf']):
+            self.main_object = DuoOpenVPN()
+        try:
+            self.normal_user = self.main_object.configfile.get('testing', 'normal_user')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            self.normal_user = None
         try:
             self.deep_test_main = self.main_object.configfile.getboolean(
                 'testing', 'deep_testing_mainauth')
         except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             self.deep_test_main = False
+        try:
+            self.one_fa_user = self.main_object.configfile.get('testing', 'one_fa_user')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            self.one_fa_user = None
+        try:
+            self.one_fa_pass = self.main_object.configfile.get('testing', 'one_fa_pass')
+        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+            self.one_fa_pass = None
         #
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
 
@@ -68,12 +84,9 @@ class TestDuoOpenVPN(unittest.TestCase):
         """ A 1FA user trying to 2FA fails """
         # This is a weird test that stems from a 1FA user pretending to
         # have a Duo.
-        try:
-            one_fa_user = self.main_object.configfile.get('testing',
-                                                          'one_fa_user')
-        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+        if not self.one_fa_user:  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
-        os.environ['common_name'] = one_fa_user
+        os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = 'push'
         library = DuoOpenVPN()
         library.log_to_stdout = False
@@ -82,12 +95,9 @@ class TestDuoOpenVPN(unittest.TestCase):
 
     def test_1fa_user_bad_pw(self):
         """ A 1FA user with a bad password fails """
-        try:
-            one_fa_user = self.main_object.configfile.get('testing',
-                                                          'one_fa_user')
-        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+        if not self.one_fa_user:  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
-        os.environ['common_name'] = one_fa_user
+        os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = 'a-bad-password'
         library = DuoOpenVPN()
         library.log_to_stdout = False
@@ -96,18 +106,12 @@ class TestDuoOpenVPN(unittest.TestCase):
 
     def test_1fa_user_good_pw(self):
         """ A 1FA user with a good password works """
-        try:
-            one_fa_user = self.main_object.configfile.get('testing',
-                                                          'one_fa_user')
-        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+        if not self.one_fa_user:  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
-        try:
-            one_fa_pass = self.main_object.configfile.get('testing',
-                                                          'one_fa_pass')
-        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+        if not self.one_fa_pass:  # pragma: no cover
             return self.skipTest('No testing/one_fa_pass defined')
-        os.environ['common_name'] = one_fa_user
-        os.environ['password'] = one_fa_pass
+        os.environ['common_name'] = self.one_fa_user
+        os.environ['password'] = self.one_fa_pass
         library = DuoOpenVPN()
         library.log_to_stdout = False
         res = library.main_authentication()
@@ -117,6 +121,8 @@ class TestDuoOpenVPN(unittest.TestCase):
         """ A 2FA user with a bad push fails  PLEASE DENY """
         if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
+        if not self.normal_user:  # pragma: no cover
+            return self.skipTest('No testing/normal_user defined')
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'
         library = DuoOpenVPN()
@@ -128,6 +134,8 @@ class TestDuoOpenVPN(unittest.TestCase):
         """ A 2FA user with a bad push fails  PLEASE ALLOW """
         if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
+        if not self.normal_user:  # pragma: no cover
+            return self.skipTest('No testing/normal_user defined')
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'
         library = DuoOpenVPN()

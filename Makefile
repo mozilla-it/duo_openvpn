@@ -5,7 +5,7 @@ PACKAGE := duo_openvpn_mozilla
 VERSION := 1.1.0
 .DEFAULT: test
 .PHONY: test coverage coveragereport pyinstall pep8 pylint pythonrpm pluginrpm rpm pythonrpm pythonrpm2 pythonrpm3 deb pypi install clean
-TEST_FLAGS_FOR_SUITE := -m unittest discover -v -f -s test/unit
+TEST_FLAGS_FOR_SUITE := -m unittest discover -f
 
 PLAIN_PYTHON = $(shell which python 2>/dev/null)
 PYTHON3 = $(shell which python3 2>/dev/null)
@@ -31,11 +31,16 @@ endif
 # capabilities of the user being tested's device
 test:
 	# If you are seeing a lot of skips, consider editing the deep_testing flags in your conf file.
-	python -B $(TEST_FLAGS_FOR_SUITE) test/integration
+	$(COVERAGE) run $(TEST_FLAGS_FOR_SUITE) -v -s test/integration
+	@rm -rf test/integration/__pycache__
+	@rm -f test/*.pyc test/*/*.pyc
+
+testreport:
+	$(COVERAGE) report -m $(PACKAGE)/*.py test/integration/*.py
 
 coverage:
-	$(COVERAGE) run $(TEST_FLAGS_FOR_SUITE)
-	@rm -rf test/__pycache__
+	$(COVERAGE) run $(TEST_FLAGS_FOR_SUITE) -s test/unit
+	@rm -rf test/unit/__pycache__
 	@rm -f $(PACKAGE)/*.pyc test/*.pyc test/*/*.pyc
 
 coveragereport:

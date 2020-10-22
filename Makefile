@@ -11,10 +11,12 @@ PLAIN_PYTHON = $(shell which python 2>/dev/null)
 PYTHON3 = $(shell which python3 2>/dev/null)
 ifneq (, $(PYTHON3))
   PYTHON_BIN = $(PYTHON3)
+  PY_PACKAGE_PREFIX = python3
   RPM_MAKE_TARGET = pythonrpm3
 endif
 ifneq (, $(PLAIN_PYTHON))
   PYTHON_BIN = $(PLAIN_PYTHON)
+  PY_PACKAGE_PREFIX = python
   RPM_MAKE_TARGET = pythonrpm2
 endif
 
@@ -59,18 +61,18 @@ pylint:
 pythonrpm:  $(RPM_MAKE_TARGET)
 
 pythonrpm2:
-	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration 1 setup.py
+	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix $(PY_PACKAGE_PREFIX) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration 1 setup.py
 	@rm -rf build $(PACKAGE).egg-info
 
 pythonrpm3:
-	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix python3 --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration 1 setup.py
+	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix $(PY_PACKAGE_PREFIX) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration 1 setup.py
 	@rm -rf build $(PACKAGE).egg-info
 
 # FIXME: summary  description   git?
 pluginrpm:
 	$(MAKE) DESTDIR=./tmp install
 	fpm -s dir -t rpm --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" \
-    -d python-duo-openvpn-mozilla -d openvpn_defer_auth \
+    -d $(PY_PACKAGE_PREFIX)-duo-openvpn-mozilla -d openvpn_defer_auth \
     -n duo_openvpn-mozilla -v $(VERSION) \
     --url https://github.com/mozilla-it/duo_openvpn \
     -a noarch -C tmp usr

@@ -90,6 +90,7 @@ pypi:
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
 	$(INSTALL) -m755 duo_openvpn.py $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/
+	sed -i "1c#! $(PYTHON_BIN)" $(DESTDIR)$(PREFIX)/lib/openvpn/plugins/duo_openvpn.py
 
 clean:
 	rm -f *.pyc test/*.pyc $(PACKAGE)/*.pyc

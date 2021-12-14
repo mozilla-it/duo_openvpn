@@ -55,16 +55,6 @@ class DuoOpenVPN(object):
         except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
             # Fail secure if they can't tell us otherwise.
             self.failopen = False
-        # We use mozdef to log about activities.  However, for triage,
-        # it is in our interest to keep records, real-time, on the server.
-        # mozdef can do syslog, but that is a separate file from the vpn's
-        # activity log.  So, to put it all in one place, we can log to
-        # stdout.
-        try:
-            self.log_to_stdout = self.configfile.getboolean('duo-behavior',
-                                                            'log_to_stdout')
-        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
-            self.log_to_stdout = True
 
     def _ingest_config_from_file(self):
         """
@@ -97,11 +87,6 @@ class DuoOpenVPN(object):
         if details is not None:
             logger.details = details
         logger.send()
-        # Print to stdout here because we want a local copy of the results.
-        # We could log to syslog, but that separates our files from the
-        # openvpn log to syslog.
-        if self.log_to_stdout:
-            print(logger.syslog_convert())
 
     def main_authentication(self):  # pylint: disable=too-many-return-statements
         """

@@ -68,15 +68,12 @@ class TestDuoOpenVPN(unittest.TestCase):
                               '_fail_open must return a bool')
         self.assertIsInstance(self.main_object.duo_client_args, dict,
                               'duo_client_args must be a dict')
-        self.assertIsInstance(self.main_object.log_to_stdout, bool,
-                              'log_to_stdout must be a bool')
 
     def test_bogus_user(self):
         """ A bogus user is denied """
         os.environ['common_name'] = 'user-who-does-not-exist'
         os.environ['password'] = 'push'
         library = DuoOpenVPN()
-        library.log_to_stdout = False
         res = library.main_authentication()
         self.assertFalse(res, 'invalid users must be denied')
 
@@ -89,7 +86,6 @@ class TestDuoOpenVPN(unittest.TestCase):
         os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = 'push'
         library = DuoOpenVPN()
-        library.log_to_stdout = False
         res = library.main_authentication()
         self.assertFalse(res, '1fa user attempting to 2fa must be denied')
 
@@ -100,7 +96,6 @@ class TestDuoOpenVPN(unittest.TestCase):
         os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = 'a-bad-password'
         library = DuoOpenVPN()
-        library.log_to_stdout = False
         res = library.main_authentication()
         self.assertFalse(res, '1fa user with bad password must be denied')
 
@@ -113,7 +108,6 @@ class TestDuoOpenVPN(unittest.TestCase):
         os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = self.one_fa_pass
         library = DuoOpenVPN()
-        library.log_to_stdout = False
         res = library.main_authentication()
         self.assertTrue(res, '1fa user with good password gets accepted')
 
@@ -126,7 +120,6 @@ class TestDuoOpenVPN(unittest.TestCase):
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'
         library = DuoOpenVPN()
-        library.log_to_stdout = False
         res = library.main_authentication()
         self.assertFalse(res, '2fa user with a deny must be False')
 
@@ -139,7 +132,6 @@ class TestDuoOpenVPN(unittest.TestCase):
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'
         library = DuoOpenVPN()
-        library.log_to_stdout = False
         res = library.main_authentication()
         self.assertTrue(res, '2fa user with an allow must be True')
 
@@ -147,7 +139,6 @@ class TestDuoOpenVPN(unittest.TestCase):
         """ Test sending a log message to mozdef - all good """
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
-        self.main_object.log_to_stdout = False
         self.main_object.log(summary='TEST message',
                              severity='DEBUG',)
 
@@ -156,6 +147,5 @@ class TestDuoOpenVPN(unittest.TestCase):
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
         # This has a garbage severity, function should correct it.
-        self.main_object.log_to_stdout = False
         self.main_object.log(summary='TEST message',
                              severity='blerp',)

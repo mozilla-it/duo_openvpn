@@ -104,12 +104,10 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
 
     def test_10_logging(self):
         """ Validate that log does the right things. """
-        self.library.log_to_stdout = True
         with mock.patch('mozdef_client_config.ConfigedMozDefEvent') as mock_logger:
             instance = mock_logger.return_value
             with mock.patch.object(instance, 'send') as mock_send, \
-                    mock.patch.object(instance, 'syslog_convert', return_value='msg1'), \
-                    mock.patch('sys.stdout', new=StringIO()) as fake_out:
+                    mock.patch.object(instance, 'syslog_convert', return_value='msg1'):
                 self.library.log('blah1', severity='CRITICAL', details='foo1')
         self.assertEqual(instance.category, 'authentication')
         self.assertEqual(instance.source, 'openvpn')
@@ -117,17 +115,6 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         self.assertEqual(instance.summary, 'blah1')
         self.assertEqual(instance.details, 'foo1')
         mock_send.assert_called_once_with()
-        self.assertIn('msg1', fake_out.getvalue())
-
-        self.library.log_to_stdout = False
-        with mock.patch('mozdef_client_config.ConfigedMozDefEvent') as mock_logger:
-            instance = mock_logger.return_value
-            with mock.patch.object(instance, 'send') as mock_send, \
-                    mock.patch.object(instance, 'syslog_convert', return_value='msg1'), \
-                    mock.patch('sys.stdout', new=StringIO()) as fake_out:
-                self.library.log('blah1', severity='CRITICAL')
-        mock_send.assert_called_once_with()
-        self.assertEqual('', fake_out.getvalue())
 
     def test_20_auth_bogus_user(self):
         """ A bogus user is denied """

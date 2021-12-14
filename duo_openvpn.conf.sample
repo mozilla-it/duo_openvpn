@@ -17,12 +17,6 @@
 # If FAIL_OPEN is set to True, then authentication will succeed when
 # communication with DuoAPI fails.
 fail_open = False
-#
-# If log_to_stdout is true, results will be printed to stdout.
-# This will 'clutter' the openvpn log file, but this adds real-time
-# coordinated results from Duo activity in the audit trail, for one-file
-# debugging.
-log_to_stdout = True
 
 
 [testing]

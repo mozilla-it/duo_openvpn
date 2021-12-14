@@ -36,7 +36,6 @@ class TestDuoAPIAuth(unittest.TestCase):
                                     '/etc/openvpn/duo_openvpn.conf',
                                     '/etc/duo_openvpn.conf']):
             self.main_object = DuoOpenVPN()
-        self.main_object.log_to_stdout = False
         try:
             self.normal_user = self.main_object.configfile.get('testing', 'normal_user')
         except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover

@@ -46,7 +46,6 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
                                     '/etc/duo_openvpn.conf',
                                     self.testing_conffile]):
             self.main_object = DuoOpenVPN()
-        self.main_object.log_to_stdout = False
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
         user_creds = dict()

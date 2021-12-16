@@ -7,15 +7,15 @@
 import unittest
 import os
 import sys
+import datetime
+import json
+import syslog
 import test.context  # pylint: disable=unused-import
+from six.moves import configparser
 import mock
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    from six.moves import configparser
 if sys.version_info.major >= 3:
     from io import StringIO  # pragma: no cover
 else:
@@ -37,7 +37,6 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         # test class.  As such, we don't have a good setup here.
         # Each test will have to do a lot of situational setup.
         # That said, we make a garbage object just to get our library read:
-
         config = configparser.ConfigParser()
         config.add_section('duo-credentials')
         config.set('duo-credentials', 'IKEY', 'DI9QQ99X9MK4H99RJ9FF')
@@ -46,11 +45,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         with open(self.testing_conffile, 'w') as configfile:
             config.write(configfile)
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
-                               new=['duo_openvpn.conf',
-                                    '/usr/local/etc/duo_openvpn.conf',
-                                    '/etc/openvpn/duo_openvpn.conf',
-                                    '/etc/duo_openvpn.conf',
-                                    self.testing_conffile]):
+                               new=[self.testing_conffile]):
             self.library = DuoOpenVPN()
 
     def tearDown(self):
@@ -102,19 +97,75 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         self.assertEqual(result.get('aa', 'bb'), 'cc',
                          'Should have read a correct value.')
 
-    def test_10_logging(self):
-        """ Validate that log does the right things. """
-        with mock.patch('mozdef_client_config.ConfigedMozDefEvent') as mock_logger:
-            instance = mock_logger.return_value
-            with mock.patch.object(instance, 'send') as mock_send, \
-                    mock.patch.object(instance, 'syslog_convert', return_value='msg1'):
-                self.library.log('blah1', severity='CRITICAL', details='foo1')
-        self.assertEqual(instance.category, 'authentication')
-        self.assertEqual(instance.source, 'openvpn')
-        self.assertIn('vpn', instance.tags)
-        self.assertEqual(instance.summary, 'blah1')
-        self.assertEqual(instance.details, 'foo1')
-        mock_send.assert_called_once_with()
+    def test_07_ingest_defaults(self):
+        """ With a weak file, check our defaults """
+        self.assertIn('ikey', self.library.duo_client_args)
+        self.assertIn('skey', self.library.duo_client_args)
+        self.assertIn('host', self.library.duo_client_args)
+        self.assertFalse(self.library.failopen)
+        self.assertFalse(self.library.event_send)
+        self.assertEqual(self.library.event_facility, syslog.LOG_AUTH)
+
+    def test_08_ingest_configs(self):
+        """ With a strong file, check our imports """
+        config = configparser.ConfigParser()
+        config.add_section('duo-credentials')
+        config.set('duo-credentials', 'IKEY', 'DI9QQ99X9MK4H99RJ9FF')
+        config.set('duo-credentials', 'SKEY', '2md9rw5xeyxt8c648dgkmdrg3zpvnhj5b596mgku')
+        config.set('duo-credentials', 'HOST', 'api-9f134ff9.duosekurity.com')
+        config.add_section('duo-behavior')
+        config.set('duo-behavior', 'fail_open', 'True')
+        config.add_section('duo-openvpn')
+        config.set('duo-openvpn', 'syslog-events-send', 'True')
+        config.set('duo-openvpn', 'syslog-events-facility', 'junk')
+        with open(self.testing_conffile, 'w') as configfile:
+            config.write(configfile)
+        with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
+                               new=[self.testing_conffile]):
+            self.library = DuoOpenVPN()
+        self.assertIn('ikey', self.library.duo_client_args)
+        self.assertIn('skey', self.library.duo_client_args)
+        self.assertIn('host', self.library.duo_client_args)
+        self.assertTrue(self.library.failopen)
+        self.assertTrue(self.library.event_send)
+        self.assertEqual(self.library.event_facility, syslog.LOG_AUTH)
+
+    def test_10_log_nosend(self):
+        ''' Test the log method failing to send '''
+        self.library.event_send = False
+        with mock.patch('syslog.openlog') as mock_openlog, \
+                mock.patch('syslog.syslog') as mock_syslog:
+            self.library.log('some message', {'foo': 5}, 'CRITICAL')
+        mock_openlog.assert_not_called()
+        mock_syslog.assert_not_called()
+
+    def test_11_log_send(self):
+        ''' Test the log method tries to send '''
+        datetime_mock = mock.Mock(wraps=datetime.datetime)
+        datetime_mock.utcnow.return_value = datetime.datetime(2020, 12, 25, 13, 14, 15, 123456)
+        self.library.event_send = True
+        self.library.event_facility = syslog.LOG_LOCAL1
+        with mock.patch('syslog.openlog') as mock_openlog, \
+                mock.patch('syslog.syslog') as mock_syslog, \
+                mock.patch('datetime.datetime', new=datetime_mock), \
+                mock.patch('os.getpid', return_value=12345), \
+                mock.patch('socket.getfqdn', return_value='my.host.name'):
+            self.library.log('some message', {'foo': 5}, 'CRITICAL')
+        mock_openlog.assert_called_once_with(facility=syslog.LOG_LOCAL1)
+        mock_syslog.assert_called_once()
+        arg_passed_in = mock_syslog.call_args_list[0][0][0]
+        json_sent = json.loads(arg_passed_in)
+        details = json_sent['details']
+        self.assertEqual(json_sent['category'], 'authentication')
+        self.assertEqual(json_sent['processid'], 12345)
+        self.assertEqual(json_sent['severity'], 'CRITICAL')
+        self.assertIn('processname', json_sent)
+        self.assertEqual(json_sent['timestamp'], '2020-12-25T13:14:15.123456+00:00')
+        self.assertEqual(json_sent['hostname'], 'my.host.name')
+        self.assertEqual(json_sent['summary'], 'some message')
+        self.assertEqual(json_sent['source'], 'openvpn')
+        self.assertEqual(json_sent['tags'], ['vpn', 'duosecurity'])
+        self.assertEqual(details, {'foo': 5})
 
     def test_20_auth_bogus_user(self):
         """ A bogus user is denied """

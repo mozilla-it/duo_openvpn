@@ -1,12 +1,6 @@
 [submodule "duo_client"]
 	path = duo_client
 	url = https://github.com/duosecurity/duo_client_python.git
-[submodule "mozdef_client"]
-	path = mozdef_client
-	url = https://github.com/mozilla/mozdef_client.git
 [submodule "iamvpnlibrary"]
 	path = iamvpnlibrary
 	url = https://github.com/mozilla-it/iamvpnlibrary.git
-[submodule "mozdef_client_config"]
-	path = mozdef_client_config
-	url = https://github.com/mozilla-it/mozdef_client_config.git

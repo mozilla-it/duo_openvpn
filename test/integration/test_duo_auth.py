@@ -10,13 +10,10 @@ import test.context  # pylint: disable=unused-import
 import mock
 import six
 import duo_client
+from six.moves import configparser
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    from six.moves import configparser
 
 
 class TestDuoAPIAuth(unittest.TestCase):
@@ -474,7 +471,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         return self._main_testing_run('passcode', False)
 
     def test_log_good(self):
-        """ Test sending a log message to mozdef - all good """
+        """ Test sending a log message - all good """
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
         tmplibrary = DuoAPIAuth(log_func=self.main_object.log,

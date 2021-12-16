@@ -7,7 +7,7 @@
     the two.
 
     It also uses the iamvpnlibrary to learn about users, and logs
-    the results to mozdef.
+    the results to syslog.
 """
 # vim: set noexpandtab:ts=4
 
@@ -19,14 +19,15 @@ import sys
 import os
 import traceback
 import iamvpnlibrary
-import mozdef_client_config
+import datetime
+import socket
+import json
+import syslog
+import pytz
+from six.moves import configparser
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 sys.dont_write_bytecode = True
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    from six.moves import configparser
 
 
 class DuoOpenVPN(object):
@@ -52,9 +53,25 @@ class DuoOpenVPN(object):
         try:
             self.failopen = self.configfile.getboolean('duo-behavior',
                                                        'fail_open')
-        except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
+        except (configparser.NoOptionError, configparser.NoSectionError):
             # Fail secure if they can't tell us otherwise.
             self.failopen = False
+
+        try:
+            self.event_send = self.configfile.getboolean(
+                'duo-openvpn', 'syslog-events-send')
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            self.event_send = False
+
+        try:
+            _base_facility = self.configfile.get(
+                'duo-openvpn', 'syslog-events-facility')
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            _base_facility = 'auth'
+        try:
+            self.event_facility = getattr(syslog, 'LOG_{}'.format(_base_facility.upper()))
+        except (AttributeError):
+            self.event_facility = syslog.LOG_AUTH
 
     def _ingest_config_from_file(self):
         """
@@ -74,19 +91,28 @@ class DuoOpenVPN(object):
             raise IOError('Config file not found')
         return config
 
-    def log(self, summary, severity=None, details=None):
+    def log(self, summary, details, severity):
         """
-            This segment sends a log to mozdef for important events.
+            This segment sends a log to syslog
         """
-        logger = mozdef_client_config.ConfigedMozDefEvent()
-        logger.category = 'authentication'
-        logger.source = 'openvpn'
-        logger.tags = ['vpn', 'duosecurity']
-        logger.summary = summary
-        logger.set_severity_from_string(severity)
-        if details is not None:
-            logger.details = details
-        logger.send()
+        if not self.event_send:
+            return
+        output_json = {
+            'category': 'authentication',
+            'processid': os.getpid(),
+            'severity': severity,
+            'processname': sys.argv[0],
+            # Have to use pytz because py2 is terrible here.
+            'timestamp': pytz.timezone('UTC').localize(datetime.datetime.utcnow()).isoformat(),
+            'details': details,
+            'hostname': socket.getfqdn(),
+            'summary': summary,
+            'tags': ['vpn', 'duosecurity'],
+            'source': 'openvpn',
+        }
+        syslog_message = json.dumps(output_json)
+        syslog.openlog(facility=self.event_facility)
+        syslog.syslog(syslog_message)
 
     def main_authentication(self):  # pylint: disable=too-many-return-statements
         """
@@ -129,8 +155,8 @@ class DuoOpenVPN(object):
             # Here we have a user not allowed to VPN in at all.
             # This is some form of "their account is disabled" and/or
             # they aren't in the approved ACL list.
-            self.log(summary=('FAIL: VPN user "{}" administratively '
-                              'denied'.format(username)),
+            self.log(summary=('FAIL: VPN user "{}" denied for not being '
+                              'allowed to use the VPN'.format(username)),
                      severity='INFO',
                      details={'username': username,
                               'sourceipaddress': client_ipaddr,

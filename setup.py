@@ -46,7 +46,7 @@ setup(
     version=VERSION,
     author='Greg Cox',
     author_email='gcox@mozilla.com',
-    keywords="mozdef duosecurity openvpn",
+    keywords="duosecurity openvpn",
     description=('A plugin to OpenVPN to use ' +
                  'DuoSecurity and LDAP authentication\n' +
                  'This package is built upon commit ' + git_version()),
@@ -55,7 +55,6 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         'iamvpnlibrary>=0.10.0',
-        'mozdef-client-config',
         'duo_client>=3.3.0',
     ],
     classifiers=[

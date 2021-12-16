@@ -7,7 +7,5 @@ sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(1, 'duo_client')
 sys.path.insert(1, 'duo_openvpn_mozilla')
 sys.path.insert(1, 'iamvpnlibrary')
-sys.path.insert(1, 'mozdef_client')
-sys.path.insert(1, 'mozdef_client_config')
 
 sys.dont_write_bytecode = True

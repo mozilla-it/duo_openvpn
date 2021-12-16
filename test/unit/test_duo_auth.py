@@ -10,13 +10,10 @@ import socket
 import test.context  # pylint: disable=unused-import
 import mock
 import duo_client
+from six.moves import configparser
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    from six.moves import configparser
 
 
 class TestDuoAPIAuthUnit(unittest.TestCase):

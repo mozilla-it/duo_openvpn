@@ -8,11 +8,8 @@ import unittest
 import os
 import test.context  # pylint: disable=unused-import
 import mock
+from six.moves import configparser
 from duo_openvpn_mozilla import DuoOpenVPN
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    from six.moves import configparser
 
 
 class TestDuoOpenVPN(unittest.TestCase):
@@ -136,14 +133,14 @@ class TestDuoOpenVPN(unittest.TestCase):
         self.assertTrue(res, '2fa user with an allow must be True')
 
     def test_log_good(self):
-        """ Test sending a log message to mozdef - all good """
+        """ Test sending a log message - all good """
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
         self.main_object.log(summary='TEST message',
                              severity='DEBUG',)
 
     def test_log_bad1(self):
-        """ Test sending a log message to mozdef - bad severity """
+        """ Test sending a log message - bad severity """
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
         # This has a garbage severity, function should correct it.

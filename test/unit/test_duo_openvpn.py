@@ -105,6 +105,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         self.assertFalse(self.library.failopen)
         self.assertFalse(self.library.event_send)
         self.assertEqual(self.library.event_facility, syslog.LOG_AUTH)
+        self.assertEqual(self.library.duo_timeout, 300)
 
     def test_08_ingest_configs(self):
         """ With a strong file, check our imports """
@@ -115,9 +116,10 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         config.set('duo-credentials', 'HOST', 'api-9f134ff9.duosekurity.com')
         config.add_section('duo-behavior')
         config.set('duo-behavior', 'fail_open', 'True')
+        config.set('duo-behavior', 'duo-timeout', '120')
         config.add_section('duo-openvpn')
         config.set('duo-openvpn', 'syslog-events-send', 'True')
-        config.set('duo-openvpn', 'syslog-events-facility', 'junk')
+        config.set('duo-openvpn', 'syslog-events-facility', 'local5')
         with open(self.testing_conffile, 'w') as configfile:
             config.write(configfile)
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
@@ -127,7 +129,27 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         self.assertIn('skey', self.library.duo_client_args)
         self.assertIn('host', self.library.duo_client_args)
         self.assertTrue(self.library.failopen)
+        self.assertEqual(self.library.duo_timeout, 120)
         self.assertTrue(self.library.event_send)
+        self.assertEqual(self.library.event_facility, syslog.LOG_LOCAL5)
+
+    def test_09_ingest_stupidity(self):
+        """ With a terrible file, check our imports """
+        config = configparser.ConfigParser()
+        config.add_section('duo-credentials')
+        config.set('duo-credentials', 'IKEY', 'DI9QQ99X9MK4H99RJ9FF')
+        config.set('duo-credentials', 'SKEY', '2md9rw5xeyxt8c648dgkmdrg3zpvnhj5b596mgku')
+        config.set('duo-credentials', 'HOST', 'api-9f134ff9.duosekurity.com')
+        config.add_section('duo-behavior')
+        config.set('duo-behavior', 'duo-timeout', '-5')
+        config.add_section('duo-openvpn')
+        config.set('duo-openvpn', 'syslog-events-facility', 'junk')
+        with open(self.testing_conffile, 'w') as configfile:
+            config.write(configfile)
+        with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
+                               new=[self.testing_conffile]):
+            self.library = DuoOpenVPN()
+        self.assertEqual(self.library.duo_timeout, 300)
         self.assertEqual(self.library.event_facility, syslog.LOG_AUTH)
 
     def test_10_log_nosend(self):

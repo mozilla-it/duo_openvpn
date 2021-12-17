@@ -7,6 +7,7 @@
 import unittest
 import os
 import sys
+import time
 import test.context  # pylint: disable=unused-import
 import mock
 import duo_openvpn
@@ -62,4 +63,35 @@ class TestOpenVPNScript(unittest.TestCase):
             duo_openvpn.main()
         file_handle = mock_open.return_value.__enter__.return_value
         file_handle.write.assert_called_with('1')
+        self.assertEqual(exiting.exception.code, 0)
+
+    def test_12_access_timeout(self):
+        """ When Duo is down, handle it well. """
+        os.environ['auth_control_file'] = '/tmp/foo'
+        def too_slow_authentication():
+            '''
+                This function is waiting 5 seconds and the responding true.
+                The idea here is that 5s is "too long" (we use a 2s alarm below) but
+                then pretend the check passed.  This True should be ignored since we're
+                going to timeout and thus fail, but it's here to be True in case the test
+                breaks down and lets someone in.
+            '''
+            time.sleep(5)
+            # The return statement should never be reached:because of the alarm.
+            return True  # pragma: no cover
+        with mock.patch('duo_openvpn.DuoOpenVPN') as mock_duo:
+            duo_instance = mock_duo.return_value
+            duo_instance.duo_timeout = 2
+            duo_instance.failopen = False
+            with self.assertRaises(SystemExit) as exiting, \
+                    mock.patch('duo_openvpn.open', create=True,
+                               return_value=mock.MagicMock(spec=StringIO())) as mock_open, \
+                    mock.patch.object(duo_instance, 'main_authentication',
+                                      side_effect=too_slow_authentication):
+                # our timeout is 2s, beating the 5s delay.  Actual times are irrelevant,
+                # so long as we alarm, and alarm before a response comes back.
+                # We fail closed, meaning that we should deny the user.
+                duo_openvpn.main()
+        file_handle = mock_open.return_value.__enter__.return_value
+        file_handle.write.assert_called_with('0')
         self.assertEqual(exiting.exception.code, 0)

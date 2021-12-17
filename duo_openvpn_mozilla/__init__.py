@@ -18,11 +18,11 @@
 import sys
 import os
 import traceback
-import iamvpnlibrary
 import datetime
 import socket
 import json
 import syslog
+import iamvpnlibrary
 import pytz
 from six.moves import configparser
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
@@ -56,6 +56,18 @@ class DuoOpenVPN(object):
         except (configparser.NoOptionError, configparser.NoSectionError):
             # Fail secure if they can't tell us otherwise.
             self.failopen = False
+
+        try:
+            self.duo_timeout = self.configfile.getint('duo-behavior',
+                                                      'duo-timeout')
+            if self.duo_timeout < 0 or self.duo_timeout >= 3600:
+                # A Duo transaction should take seconds.  If you're trying
+                # to wait more than an hour, just accept no timeout, or
+                # write me and give me a reason that this is wrong.
+                self.duo_timeout = 300
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            # Fail secure if they can't tell us otherwise.
+            self.duo_timeout = 300
 
         try:
             self.event_send = self.configfile.getboolean(

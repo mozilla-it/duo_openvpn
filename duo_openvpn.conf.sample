@@ -17,6 +17,12 @@
 # If FAIL_OPEN is set to True, then authentication will succeed when
 # communication with DuoAPI fails.
 fail_open = False
+#
+# Number of seconds before giving up on someone responding to a Duo task
+# 300 is the default.  0 is acceptable as 'no timeout'.
+# This exists to keep "Duo is down" from stacking up forked processes
+# and causing the VPN to become unusable.
+duo-timeout = 300
 
 
 [duo-openvpn]

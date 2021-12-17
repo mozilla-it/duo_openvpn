@@ -16,9 +16,16 @@
 # Contributors: gdestuynder@mozilla.com
 import sys
 import os
+import signal
 from duo_openvpn_mozilla import DuoOpenVPN
 sys.dont_write_bytecode = True
 
+class DuoTimeoutError(Exception):
+    ''' Just an exception to indicate we timed out talking to Duo '''
+
+def duo_timeout_handler(signum, frame):
+    ''' If we time out, raise an error '''
+    raise DuoTimeoutError('Duo timed out')
 
 def main():
     """
@@ -46,7 +53,16 @@ def main():
     # The env-variable work is in OpenVPNCredentials
 
     auth_object = DuoOpenVPN()
-    if auth_object.main_authentication():
+    try:
+        if auth_object.duo_timeout:
+            signal.signal(signal.SIGALRM, duo_timeout_handler)
+            signal.alarm(auth_object.duo_timeout)
+        should_allow_in = auth_object.main_authentication()
+        if auth_object.duo_timeout:
+            signal.alarm(0)
+    except DuoTimeoutError:
+        should_allow_in = auth_object.failopen
+    if should_allow_in:
         writeout_value = str(1)
     else:
         writeout_value = str(0)

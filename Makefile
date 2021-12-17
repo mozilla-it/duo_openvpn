@@ -2,7 +2,7 @@ INSTALL	:= install
 DESTDIR	:= /
 PREFIX	:= /usr
 PACKAGE := duo_openvpn_mozilla
-VERSION := 1.1.0
+VERSION := 1.4.1
 .DEFAULT: test
 .PHONY: test coverage coveragereport pyinstall pep8 pylint pythonrpm pluginrpm rpm pythonrpm pythonrpm2 pythonrpm3 deb pypi install clean
 TEST_FLAGS_FOR_SUITE := -m unittest discover -f
@@ -72,7 +72,7 @@ pythonrpm3:
 pluginrpm:
 	$(MAKE) DESTDIR=./tmp install
 	fpm -s dir -t rpm --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" \
-    -d $(PY_PACKAGE_PREFIX)-duo-openvpn-mozilla -d openvpn_defer_auth \
+    -d "$(PY_PACKAGE_PREFIX)-duo-openvpn-mozilla >= 1.4.1" -d openvpn_defer_auth \
     -n duo_openvpn-mozilla -v $(VERSION) \
     --url https://github.com/mozilla-it/duo_openvpn \
     -a noarch -C tmp usr

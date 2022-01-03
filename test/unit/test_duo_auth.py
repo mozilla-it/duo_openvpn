@@ -7,6 +7,7 @@
 import unittest
 import os
 import socket
+import httplib
 import test.context  # pylint: disable=unused-import
 import mock
 import duo_client
@@ -191,6 +192,14 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
 
         with mock.patch.object(self.library, 'log') as mock_log:
             with mock.patch.object(self.library, 'preauth', side_effect=RuntimeError):
+                res = self.library._preauth()
+            self.assertFalse(res, "Broken check must return False")
+            # Check the call_args - [1] is the kwargs.
+            self.assertEqual(mock_log.call_args[1]['details']['error'], 'true')
+            self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
+
+        with mock.patch.object(self.library, 'log') as mock_log:
+            with mock.patch.object(self.library, 'preauth', side_effect=httplib.BadStatusLine('')):
                 res = self.library._preauth()
             self.assertFalse(res, "Broken check must return False")
             # Check the call_args - [1] is the kwargs.

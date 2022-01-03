@@ -20,6 +20,7 @@
 # Contributors: gdestuynder@mozilla.com
 import sys
 import socket
+import httplib
 import six
 import duo_client
 sys.dont_write_bytecode = True
@@ -133,9 +134,20 @@ class DuoAPIAuth(duo_client.Auth):
                      severity='CRITICAL')
             return None
         except RuntimeError as err:
-            # This is when the call returns a 400.for bad parameters.
+            # This is when the call returns a 400 for bad parameters.
             self.log(summary=('FAIL: DuoAPIAuth preauth '
                               'runtime-failed {}').format(err),
+                     details={'error': 'true',
+                              'success': 'false', },
+                     severity='CRITICAL')
+            return None
+        except httplib.BadStatusLine as err:
+            # This is when the call horks midway
+            # We shouldn't need this once
+            #   https://github.com/duosecurity/duo_client_python/issues/111
+            # is handled
+            self.log(summary=('FAIL: DuoAPIAuth preauth '
+                              'had a failure talking to Duo. {}').format(err),
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -249,7 +261,7 @@ class DuoAPIAuth(duo_client.Auth):
             # A None coming back at us, we can do nothing with.
             # Trust that auth did some logging for us and quit here.
             return False
-        if (not isinstance(res, dict) or ('result' not in res)):
+        if not isinstance(res, dict) or ('result' not in res):
             # This should never happen.  This is a supreme failure
             # in code testing.
             self.log(summary='FAIL: User auth failed, software bug',
@@ -330,7 +342,7 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'false', },)
             return False
-        if (not isinstance(preauth, dict) or ('result' not in preauth)):
+        if not isinstance(preauth, dict) or ('result' not in preauth):
             self.log(summary='FAIL: User got a non-dict preauth '
                              'reply, software bug',
                      severity='ERROR',

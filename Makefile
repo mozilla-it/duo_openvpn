@@ -4,7 +4,7 @@ PREFIX	:= /usr
 PACKAGE := duo_openvpn_mozilla
 VERSION := 1.4.2
 .DEFAULT: test
-.PHONY: test coverage coveragereport pyinstall pep8 pylint pythonrpm pluginrpm rpm pythonrpm pythonrpm2 pythonrpm3 deb pypi install clean
+.PHONY: test coverage coveragereport pep8 pylint pythonrpm pluginrpm rpm pythonrpm pythonrpm2 pythonrpm3 deb pypi install clean
 TEST_FLAGS_FOR_SUITE := -m unittest discover -f
 
 PLAIN_PYTHON = $(shell which python 2>/dev/null)
@@ -47,9 +47,6 @@ coverage:
 
 coveragereport:
 	$(COVERAGE) report -m duo_openvpn.py $(PACKAGE)/*.py test/unit/*.py
-
-pyinstall:
-	./setup.py install
 
 pep8:
 	@find ./* `git submodule --quiet foreach 'echo -n "-path ./$$path -prune -o "'` -type f -name '*.py' -exec pep8 --show-source --max-line-length=100 {} \;

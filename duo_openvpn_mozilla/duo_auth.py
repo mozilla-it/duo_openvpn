@@ -20,8 +20,8 @@
 # Contributors: gdestuynder@mozilla.com
 import sys
 import socket
-import httplib
 import six
+import six.moves.http_client
 import duo_client
 sys.dont_write_bytecode = True
 
@@ -141,7 +141,7 @@ class DuoAPIAuth(duo_client.Auth):
                               'success': 'false', },
                      severity='CRITICAL')
             return None
-        except httplib.BadStatusLine as err:
+        except six.moves.http_client.BadStatusLine as err:
             # This is when the call horks midway
             # We shouldn't need this once
             #   https://github.com/duosecurity/duo_client_python/issues/111

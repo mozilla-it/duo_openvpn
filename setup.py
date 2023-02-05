@@ -56,6 +56,7 @@ setup(
     install_requires=[
         'iamvpnlibrary>=0.10.0',
         'duo_client>=3.3.0',
+        'pytz',
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

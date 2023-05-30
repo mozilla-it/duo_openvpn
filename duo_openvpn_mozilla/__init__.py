@@ -162,6 +162,7 @@ class DuoOpenVPN(object):
         username = user_data.username
         client_ipaddr = user_data.client_ipaddr
         password = user_data.password
+        session_state = user_data.session_state
 
         try:
             iam_searcher = iamvpnlibrary.IAMVPNLibrary()
@@ -212,6 +213,23 @@ class DuoOpenVPN(object):
                               'success': str(allow_1fa).lower(), },)
             return allow_1fa
 
+        # If we are sent a session_state, it is because --auth-gen-token is
+        # running as 'external-auth'.  We need to reason out what to do based
+        # on the value we are sent.
+        if session_state is None:
+            # No variable was sent: we're not in external-auth mode.  We're not authoritative.
+            pass
+        elif session_state in ['Initial', 'Expired', 'Invalid', 'AuthenticatedEmptyUser', 'ExpiredEmptyUser']:
+            # We are in a state where we haven't been approved by the server.  Ask Duo.
+            pass
+        elif session_state in ['Authenticated']:
+            # We are in a state where the server says we're okay.  This means we have enough
+            # information to validate, so we don't need to talk to Duo.  On our own authority,
+            # approve the connection.
+            return True
+
+        # We've hit the point of indecision (and that's okay!)  We don't know enough to either
+        # allow or deny the connection.  We return None as a tristate to indicate "keep going."
         return None
 
     def remote_authentication(self):

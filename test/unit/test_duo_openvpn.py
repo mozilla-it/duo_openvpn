@@ -295,11 +295,11 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'true')
 
-    def test_26_auth_local_good(self):
-        """ 2fa user passing local authentication """
+    def test_26_auth_local_new_session(self):
+        """ 2fa user which needs to talk to Duo """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'hunter2'
+        #os.environ['session_state'] = None
         with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
                 mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
                                   return_value=True):
@@ -307,6 +307,32 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
                                    return_value=True):
                 res = self.library.local_authentication()
         self.assertIsNone(res, 'a 2fa user should get None from local_authentication')
+
+    def test_27_auth_local_expired_session(self):
+        """ 2fa user passing local authentication """
+        os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
+        os.environ['common_name'] = 'bob'
+        os.environ['session_state'] = 'Expired'
+        with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
+                mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
+                                  return_value=True):
+            with mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
+                                   return_value=True):
+                res = self.library.local_authentication()
+        self.assertIsNone(res, 'a 2fa user with an expired token should continue onward to Duo')
+
+    def test_28_auth_local_returning_session(self):
+        """ 2fa user passing local authentication """
+        os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
+        os.environ['common_name'] = 'bob'
+        os.environ['session_state'] = 'Authenticated'
+        with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
+                mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
+                                  return_value=True):
+            with mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
+                                   return_value=True):
+                res = self.library.local_authentication()
+        self.assertTrue(res, 'a 2fa user with an auth-gen-token should pass local_authentication')
 
     def test_31_auth_2fa_no_load(self):
         """ 2fa user who we can't load into Duo """

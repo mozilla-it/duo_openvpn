@@ -32,7 +32,7 @@ class CredentialsTestMixin(object):
     @staticmethod
     def tearDown():  # pylint: disable=invalid-name
         """ Clear the env so we don't impact other tests """
-        for varname in ['common_name', 'password', 'username', 'untrusted_ip']:
+        for varname in ['common_name', 'password', 'username', 'untrusted_ip', 'session_state']:
             if varname in os.environ:
                 del os.environ[varname]
 
@@ -98,6 +98,7 @@ class X2LoadEnvAwful(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.password, '')
         self.assertEqual(self.library.passcode, None)
         self.assertEqual(self.library.factor, None)
+        self.assertEqual(self.library.session_state, None)
 
 
 class X4LoadEnvNormal(CredentialsTestMixin, unittest.TestCase):
@@ -121,6 +122,23 @@ class X4LoadEnvNormal(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.password, None)
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
+        self.assertEqual(self.library.session_state, None)
+
+    def test_loadenv_soup2nuts_external_auth(self):
+        """ test load_variables_from_environment as if production """
+        # Invoke load_variables_from_environment as a normal non-args call
+        # This tests that we can run through the normal codepath.
+        os.environ['common_name'] = self.realish_user
+        os.environ['username'] = self.realish_user
+        os.environ['password'] = self.realish_passcode
+        os.environ['session_state'] = 'Authenticated'
+        self.library.load_variables_from_environment()
+        self.assertTrue(self.library.is_valid())
+        self.assertEqual(self.library.username, self.realish_user)
+        self.assertEqual(self.library.password, None)
+        self.assertEqual(self.library.passcode, self.realish_passcode)
+        self.assertEqual(self.library.factor, 'passcode')
+        self.assertEqual(self.library.session_state, 'Authenticated')
 
 
 # Below here, we bypass the environmental stuff and pass arguments,

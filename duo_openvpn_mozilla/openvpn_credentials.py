@@ -53,6 +53,7 @@ class OpenVPNCredentials(object):
         self.client_ipaddr = None
         self.factor = None
         self.passcode = None
+        self.session_state = None
         # We're invalid until we load variables
         self.valid = False
 
@@ -62,6 +63,10 @@ class OpenVPNCredentials(object):
             and begins to make decisions about them, validating the inputs to
             set up for how we will authenticate the user.
         """
+        # the environmental variable 'session_state' is provided on cases
+        # of auth-gen-token and 'external-auth'.
+        __session_state = os.environ.get('session_state', None)
+
         # the environmental variable 'common_name' is what's attached to the
         # certificate of the user.  The cert's common_name is trusted.
         __common_name = os.environ.get('common_name')
@@ -70,6 +75,7 @@ class OpenVPNCredentials(object):
             # what the user sent in via the username prompt.
             raise ValueError('Must provide a common_name environment variable')
 
+        # FIXME
         # Grab their IP.  If they didn't provide one, put a fake in there
         # just to have something.
         __client_ipaddr = os.environ.get('untrusted_ip',
@@ -184,6 +190,7 @@ class OpenVPNCredentials(object):
         self.client_ipaddr = __client_ipaddr
         self.factor = __factor
         self.passcode = __passcode
+        self.session_state = __session_state
         self.valid = True
 
     @staticmethod

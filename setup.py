@@ -11,7 +11,7 @@ import os
 import subprocess
 from setuptools import setup
 
-VERSION = '1.4.3'
+VERSION = '1.4.4'
 
 
 def git_version():

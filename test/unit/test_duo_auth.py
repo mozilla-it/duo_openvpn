@@ -199,7 +199,8 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
             self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
 
         with mock.patch.object(self.library, 'log') as mock_log:
-            with mock.patch.object(self.library, 'preauth', side_effect=six.moves.http_client.BadStatusLine('')):
+            with mock.patch.object(self.library, 'preauth',
+                                   side_effect=six.moves.http_client.BadStatusLine('')):
                 res = self.library._preauth()
             self.assertFalse(res, "Broken check must return False")
             # Check the call_args - [1] is the kwargs.

@@ -137,7 +137,10 @@ class TestDuoOpenVPN(unittest.TestCase):
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
         self.main_object.log(summary='TEST message',
-                             severity='DEBUG',)
+                             severity='DEBUG',
+                             details={'error': 'false',
+                                      'success': 'false'}
+                            )
 
     def test_log_bad1(self):
         """ Test sending a log message - bad severity """
@@ -145,4 +148,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         # the function and making sure it doesn't raise.
         # This has a garbage severity, function should correct it.
         self.main_object.log(summary='TEST message',
-                             severity='blerp',)
+                             severity='blerp',
+                             details={'error': 'true',
+                                      'success': 'false'}
+                            )

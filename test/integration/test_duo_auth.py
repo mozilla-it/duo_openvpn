@@ -9,8 +9,8 @@ import os
 import test.context  # pylint: disable=unused-import
 import mock
 import six
-import duo_client
 from six.moves import configparser
+import duo_client
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN

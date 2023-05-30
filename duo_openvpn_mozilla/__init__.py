@@ -126,12 +126,10 @@ class DuoOpenVPN(object):
         syslog.openlog(facility=self.event_facility)
         syslog.syslog(syslog_message)
 
-    def main_authentication(self):  # pylint: disable=too-many-return-statements
+    def _get_user_data_from_environment(self):
         """
-            The main authentication function.
-            Return True if the user successfully authenticated.
-            Return False if they didn't.
-            It's expected that we'll handle errors within this and not raise.
+            Internal function for reading in environmental variables
+            returns a loaded OpenVPNCredentials object, or None
         """
         # Set up a user object based on the environmental variables.
         user_data = OpenVPNCredentials()
@@ -146,6 +144,19 @@ class DuoOpenVPN(object):
                      details={'error': 'true',
                               'success': 'false', },)
             traceback.print_exc()
+            return None
+        return user_data
+
+    def local_authentication(self):
+        """
+            The main authentication function.
+            Return True if the user successfully authenticated.
+            Return False if they didn't.
+            It's expected that we'll handle errors within this and not raise.
+        """
+        # Set up a user object based on the environmental variables.
+        user_data = self._get_user_data_from_environment()
+        if not isinstance(user_data, OpenVPNCredentials):
             return False
 
         username = user_data.username
@@ -201,6 +212,20 @@ class DuoOpenVPN(object):
                               'success': str(allow_1fa).lower(), },)
             return allow_1fa
 
+        return None
+
+    def remote_authentication(self):
+        '''
+            See if the remote server likes us
+        '''
+        # Set up a user object based on the environmental variables.
+        user_data = self._get_user_data_from_environment()
+        if not isinstance(user_data, OpenVPNCredentials):
+            return False
+
+        username = user_data.username
+        client_ipaddr = user_data.client_ipaddr
+
         # We don't establish a Duo object until we need it.
         duo = DuoAPIAuth(fail_open=self.failopen,
                          log_func=self.log,
@@ -231,3 +256,19 @@ class DuoOpenVPN(object):
                               'success': 'false', },)
             traceback.print_exc()
             return False
+
+    def main_authentication(self):
+        '''
+            Perform reasonable authentication balance between local and remote auth methods
+        '''
+        local_auth = self.local_authentication()
+        if isinstance(local_auth, bool):
+            # Local deemed itself authoritative, return its answer.
+            return local_auth
+        if local_auth is None:
+            # Local was nonauthoritatively okay, so check remote.
+            remote_auth = self.remote_authentication()
+            if isinstance(remote_auth, bool):
+                # Remote deemed itself authoritative, return its answer.
+                return remote_auth
+        return False

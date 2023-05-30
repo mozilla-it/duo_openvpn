@@ -189,13 +189,30 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         self.assertEqual(json_sent['tags'], ['vpn', 'duosecurity'])
         self.assertEqual(details, {'foo': 5})
 
-    def test_20_auth_bogus_user(self):
+    def test_20_auth_bogus_user_local(self):
         """ A bogus user is denied """
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
             with mock.patch.object(OpenVPNCredentials, 'load_variables_from_environment',
                                    side_effect=ValueError), \
                     mock.patch('sys.stderr', new=StringIO()) as fake_out:
-                res = self.library.main_authentication()
+                res = self.library.local_authentication()
+        self.assertFalse(res, 'invalid environment must be denied access')
+        # Check the call_args - [1] is the kwargs.
+        self.assertEqual(mock_log.call_args[1]['details']['error'], 'true')
+        self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
+        self.assertIn('Traceback', fake_out.getvalue())
+
+    def test_20_auth_bogus_user_remote(self):
+        '''
+            A bogus user is denied.  This should never actually happen since local will do
+            this before us and do the same calls against the same environment, but just in
+            case let's test it as a parallel test.
+        '''
+        with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
+            with mock.patch.object(OpenVPNCredentials, 'load_variables_from_environment',
+                                   side_effect=ValueError), \
+                    mock.patch('sys.stderr', new=StringIO()) as fake_out:
+                res = self.library.remote_authentication()
         self.assertFalse(res, 'invalid environment must be denied access')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['error'], 'true')
@@ -208,7 +225,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         os.environ['common_name'] = 'bob'
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
             with mock.patch('iamvpnlibrary.IAMVPNLibrary', side_effect=RuntimeError):
-                res = self.library.main_authentication()
+                res = self.library.local_authentication()
         self.assertFalse(res, 'Disconnected IAM must be denied access')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
@@ -221,7 +238,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
             with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam:
                 iam_instance = mock_iam.return_value
                 with mock.patch.object(iam_instance, 'user_allowed_to_vpn', return_value=False):
-                    res = self.library.main_authentication()
+                    res = self.library.local_authentication()
         self.assertFalse(res, 'Disallowed user must be denied access')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
@@ -237,7 +254,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
                                       return_value=True):
                 with mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
                                        return_value=False):
-                    res = self.library.main_authentication()
+                    res = self.library.local_authentication()
         self.assertFalse(res, '1fa user with stupid colliding passwords must be denied access')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
@@ -255,7 +272,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
                                        return_value=False), \
                         mock.patch.object(mock_iam.return_value, 'non_mfa_vpn_authentication',
                                           return_value=False):
-                    res = self.library.main_authentication()
+                    res = self.library.local_authentication()
         self.assertFalse(res, '1fa user with a wrong password must be denied access')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
@@ -273,79 +290,97 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
                                        return_value=False), \
                         mock.patch.object(mock_iam.return_value, 'non_mfa_vpn_authentication',
                                           return_value=True):
-                    res = self.library.main_authentication()
+                    res = self.library.local_authentication()
         self.assertTrue(res, '1fa user with the right password can get in')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'true')
 
-    def test_26_auth_2fa_no_load(self):
-        """ 2fa user who we can't load into Duo """
+    def test_26_auth_local_good(self):
+        """ 2fa user passing local authentication """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
         os.environ['password'] = 'hunter2'
+        with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
+                mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
+                                  return_value=True):
+            with mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
+                                   return_value=True):
+                res = self.library.local_authentication()
+        self.assertIsNone(res, 'a 2fa user should get None from local_authentication')
+
+    def test_31_auth_2fa_no_load(self):
+        """ 2fa user who we can't load into Duo """
+        os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
+        os.environ['common_name'] = 'bob'
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
-            with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
-                    mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
-                                      return_value=True), \
-                    mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
-                                      return_value=True):
-                with mock.patch('duo_auth.DuoAPIAuth'), \
-                        mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=False):
-                    res = self.library.main_authentication()
+            with mock.patch('duo_auth.DuoAPIAuth'), \
+                    mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=False):
+                res = self.library.remote_authentication()
         self.assertFalse(res, '2fa user is denied when we cannot load up our Duo search')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
 
-    def test_27_auth_2fa_fail_to_auth(self):
+    def test_32_auth_2fa_fail_to_auth(self):
         """ 2fa user who we can't load into Duo """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'hunter2'
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
-            with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
-                    mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
-                                      return_value=True), \
-                    mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
-                                      return_value=True):
-                with mock.patch('duo_auth.DuoAPIAuth'), \
-                        mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
-                        mock.patch.object(DuoAPIAuth, 'main_auth', side_effect=IOError), \
-                        mock.patch('sys.stderr', new=StringIO()) as fake_out:
-                    res = self.library.main_authentication()
+            with mock.patch('duo_auth.DuoAPIAuth'), \
+                    mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
+                    mock.patch.object(DuoAPIAuth, 'main_auth', side_effect=IOError), \
+                    mock.patch('sys.stderr', new=StringIO()) as fake_out:
+                res = self.library.remote_authentication()
         self.assertFalse(res, '2fa user is denied when Duo errors out on us')
         # Check the call_args - [1] is the kwargs.
         self.assertEqual(mock_log.call_args[1]['details']['error'], 'true')
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
         self.assertIn('Traceback', fake_out.getvalue())
 
-    def test_27_auth_2fa_duo_deny(self):
+    def test_33_auth_2fa_duo_deny(self):
         """ 2fa user who is denied by Duo """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'hunter2'
-        with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
-                mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
-                                  return_value=True), \
-                mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
-                                  return_value=True):
-            with mock.patch('duo_auth.DuoAPIAuth'), \
-                    mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
-                    mock.patch.object(DuoAPIAuth, 'main_auth', return_value=False):
-                res = self.library.main_authentication()
+        with mock.patch('duo_auth.DuoAPIAuth'), \
+                mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
+                mock.patch.object(DuoAPIAuth, 'main_auth', return_value=False):
+            res = self.library.remote_authentication()
         self.assertFalse(res, '2fa user is denied when Duo denies them')
 
-    def test_27_auth_2fa_duo_allow(self):
+    def test_34_auth_2fa_duo_allow(self):
         """ 2fa user who is allowed by Duo """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'hunter2'
-        with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
-                mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
-                                  return_value=True), \
-                mock.patch.object(mock_iam.return_value, 'does_user_require_vpn_mfa',
-                                  return_value=True):
-            with mock.patch('duo_auth.DuoAPIAuth'), \
-                    mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
-                    mock.patch.object(DuoAPIAuth, 'main_auth', return_value=True):
-                res = self.library.main_authentication()
+        with mock.patch('duo_auth.DuoAPIAuth'), \
+                mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
+                mock.patch.object(DuoAPIAuth, 'main_auth', return_value=True):
+            res = self.library.remote_authentication()
         self.assertTrue(res, '2fa user is allowed when Duo allows them')
+
+    def test_41_main_auth_local_knows(self):
+        ''' Check answers when local is authoritative '''
+        with mock.patch.object(self.library, 'local_authentication', return_value=True):
+            res = self.library.main_authentication()
+        self.assertTrue(res, 'If local approves, approve everything')
+        with mock.patch.object(self.library, 'local_authentication', return_value=False):
+            res = self.library.main_authentication()
+        self.assertFalse(res, 'If local denies, deny everything')
+
+    def test_42_main_auth_remote_knows(self):
+        ''' Check answers when remote is authoritative '''
+        with mock.patch.object(self.library, 'local_authentication', return_value=None):
+            with mock.patch.object(self.library, 'remote_authentication', return_value=True):
+                res = self.library.main_authentication()
+            self.assertTrue(res, 'If remote approves, approve everything')
+            with mock.patch.object(self.library, 'remote_authentication', return_value=False):
+                res = self.library.main_authentication()
+            self.assertFalse(res, 'If remote denies, deny everything')
+
+    def test_43_main_auth_someone_fails(self):
+        ''' Check answers when someone is confused '''
+        with mock.patch.object(self.library, 'local_authentication', return_value='something'):
+            res = self.library.main_authentication()
+        self.assertFalse(res, 'local_authentication must return a boolean-or-None')
+        with mock.patch.object(self.library, 'local_authentication', return_value=None):
+            with mock.patch.object(self.library, 'remote_authentication', return_value=None):
+                res = self.library.main_authentication()
+            self.assertFalse(res, 'remote_authentication must return a boolean')

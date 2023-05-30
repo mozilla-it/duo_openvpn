@@ -3,6 +3,7 @@ duo_openvpn.conf
 # RPMs that get built
 duo_openvpn-mozilla-*.noarch.rpm
 python-duo-openvpn-mozilla-*.noarch.rpm
+python3-duo-openvpn-mozilla-*.noarch.rpm
 # The upstream library config file, just in case we're testing locally.
 iamvpnlibrary.conf
 

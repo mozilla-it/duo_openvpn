@@ -3,6 +3,7 @@ DESTDIR := /
 PREFIX  := /usr
 PACKAGE := duo_openvpn_mozilla
 VERSION := 1.4.3
+ITERATION := 1
 .DEFAULT: test
 .PHONY: test coverage coveragereport pep8 pylint pythonrpm pluginrpm rpm pythonrpm pythonrpm2 pythonrpm3 deb pypi install clean
 TEST_FLAGS_FOR_SUITE := -m unittest discover -f
@@ -58,11 +59,11 @@ pylint:
 pythonrpm:  $(RPM_MAKE_TARGET)
 
 pythonrpm2:
-	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix $(PY_PACKAGE_PREFIX) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration 1 setup.py
+	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix $(PY_PACKAGE_PREFIX) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration $(ITERATION) setup.py
 	@rm -rf build $(PACKAGE).egg-info
 
 pythonrpm3:
-	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix $(PY_PACKAGE_PREFIX) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration 1 setup.py
+	fpm -s python -t rpm --python-bin $(PYTHON_BIN) --python-package-name-prefix $(PY_PACKAGE_PREFIX) --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" --iteration $(ITERATION) setup.py
 	@rm -rf build $(PACKAGE).egg-info
 
 # FIXME: summary  description   git?
@@ -70,7 +71,7 @@ pluginrpm:
 	$(MAKE) DESTDIR=./tmp install
 	fpm -s dir -t rpm --rpm-dist "$$(rpmbuild -E '%{?dist}' | sed -e 's#^\.##')" \
     -d "$(PY_PACKAGE_PREFIX)-duo-openvpn-mozilla >= 1.4.1" -d openvpn_defer_auth \
-    -n duo_openvpn-mozilla -v $(VERSION) \
+    -n duo_openvpn-mozilla -v $(VERSION) --iteration $(ITERATION) \
     --url https://github.com/mozilla-it/duo_openvpn \
     -a noarch -C tmp usr
 	@rm -rf ./tmp

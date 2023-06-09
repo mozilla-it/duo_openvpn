@@ -17,11 +17,8 @@
 import sys
 import os
 import signal
-from duo_openvpn_mozilla import DuoOpenVPN
+from duo_openvpn_mozilla import DuoOpenVPN, DuoTimeoutError
 sys.dont_write_bytecode = True
-
-class DuoTimeoutError(Exception):
-    ''' Just an exception to indicate we timed out talking to Duo '''
 
 def duo_timeout_handler(signum, frame):
     ''' If we time out, raise an error '''

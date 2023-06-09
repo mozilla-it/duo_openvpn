@@ -30,6 +30,9 @@ from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 sys.dont_write_bytecode = True
 
 
+class DuoTimeoutError(Exception):
+    ''' Just an exception to indicate we timed out talking to Duo '''
+
 class DuoOpenVPN(object):
     """
         This is mainly implemented as a class because it's an easier way to
@@ -263,6 +266,14 @@ class DuoOpenVPN(object):
 
         try:
             return duo.main_auth()
+        except DuoTimeoutError:
+            self.log(summary='FAIL: Duo timed out',
+                     severity='INFO',
+                     details={'username': username,
+                              'error': 'true',
+                              'sourceipaddress': client_ipaddr,
+                              'success': 'false', },)
+            return False
         except Exception:  # pylint: disable=broad-except
             # Deliberately catch all errors until we can find what can
             # go wrong.

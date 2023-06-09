@@ -15,7 +15,7 @@ from six.moves import configparser
 import mock
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
-from duo_openvpn_mozilla import DuoOpenVPN
+from duo_openvpn_mozilla import DuoOpenVPN, DuoTimeoutError
 if sys.version_info.major >= 3:
     from io import StringIO  # pragma: no cover
 else:
@@ -362,7 +362,23 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
         self.assertIn('Traceback', fake_out.getvalue())
 
-    def test_33_auth_2fa_duo_deny(self):
+    def test_33_auth_2fa_with_duo_offline(self):
+        """ 2fa user when we can't talk to Duo """
+        os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
+        os.environ['common_name'] = 'bob'
+        with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
+            with mock.patch('duo_auth.DuoAPIAuth'), \
+                    mock.patch.object(DuoAPIAuth, 'load_user_to_verify', return_value=True), \
+                    mock.patch.object(DuoAPIAuth, 'main_auth', side_effect=DuoTimeoutError), \
+                    mock.patch('sys.stderr', new=StringIO()) as fake_out:
+                res = self.library.remote_authentication()
+        self.assertFalse(res, '2fa user is denied when Duo times out on us')
+        # Check the call_args - [1] is the kwargs.
+        self.assertEqual(mock_log.call_args[1]['details']['error'], 'true')
+        self.assertEqual(mock_log.call_args[1]['details']['success'], 'false')
+        self.assertNotIn('Traceback', fake_out.getvalue())
+
+    def test_34_auth_2fa_duo_deny(self):
         """ 2fa user who is denied by Duo """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
@@ -372,7 +388,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
             res = self.library.remote_authentication()
         self.assertFalse(res, '2fa user is denied when Duo denies them')
 
-    def test_34_auth_2fa_duo_allow(self):
+    def test_35_auth_2fa_duo_allow(self):
         """ 2fa user who is allowed by Duo """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'

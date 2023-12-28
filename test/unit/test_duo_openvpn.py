@@ -164,7 +164,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
     def test_11_log_send(self):
         ''' Test the log method tries to send '''
         datetime_mock = mock.Mock(wraps=datetime.datetime)
-        datetime_mock.utcnow.return_value = datetime.datetime(2020, 12, 25, 13, 14, 15, 123456)
+        datetime_mock.now.return_value = datetime.datetime(2020, 12, 25, 13, 14, 15, 123456, tzinfo=datetime.timezone.utc)
         self.library.event_send = True
         self.library.event_facility = syslog.LOG_LOCAL1
         with mock.patch('syslog.openlog') as mock_openlog, \

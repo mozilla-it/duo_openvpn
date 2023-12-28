@@ -23,7 +23,6 @@ import socket
 import json
 import syslog
 import configparser
-import pytz
 import iamvpnlibrary
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
@@ -117,8 +116,7 @@ class DuoOpenVPN(object):
             'processid': os.getpid(),
             'severity': severity,
             'processname': sys.argv[0],
-            # Have to use pytz because py2 is terrible here.
-            'timestamp': pytz.timezone('UTC').localize(datetime.datetime.utcnow()).isoformat(),
+            'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'details': details,
             'hostname': socket.getfqdn(),
             'summary': summary,

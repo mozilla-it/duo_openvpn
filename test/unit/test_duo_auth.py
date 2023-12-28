@@ -7,11 +7,11 @@
 import unittest
 import os
 import socket
+import configparser
+import http.client
 import test.context  # pylint: disable=unused-import
 import mock
 import duo_client
-import six
-from six.moves import configparser, http_client
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN
@@ -200,7 +200,7 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
 
         with mock.patch.object(self.library, 'log') as mock_log:
             with mock.patch.object(self.library, 'preauth',
-                                   side_effect=six.moves.http_client.BadStatusLine('')):
+                                   side_effect=http.client.BadStatusLine('')):
                 res = self.library._preauth()
             self.assertFalse(res, "Broken check must return False")
             # Check the call_args - [1] is the kwargs.

@@ -20,8 +20,7 @@
 # Contributors: gdestuynder@mozilla.com
 import sys
 import socket
-import six
-import six.moves.http_client
+import http.client
 import duo_client
 sys.dont_write_bytecode = True
 
@@ -55,9 +54,9 @@ class DuoAPIAuth(duo_client.Auth):
         # All we're doing is verifying that this object looks 'close.'
         # Full evaluation is another function's job.
         try:
-            if not isinstance(user_config.username, six.string_types):
+            if not isinstance(user_config.username, str):
                 return False
-            if not isinstance(user_config.factor, six.string_types):
+            if not isinstance(user_config.factor, str):
                 # Something with a None for a factor is not going to be
                 # able to MFA.
                 return False
@@ -141,7 +140,7 @@ class DuoAPIAuth(duo_client.Auth):
                               'success': 'false', },
                      severity='CRITICAL')
             return None
-        except six.moves.http_client.BadStatusLine as err:
+        except http.client.BadStatusLine as err:
             # This is when the call horks midway
             # We shouldn't need this once
             #   https://github.com/duosecurity/duo_client_python/issues/111

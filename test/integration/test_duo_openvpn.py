@@ -6,9 +6,9 @@
 
 import unittest
 import os
+import configparser
 import test.context  # pylint: disable=unused-import
 import mock
-from six.moves import configparser
 from duo_openvpn_mozilla import DuoOpenVPN
 
 

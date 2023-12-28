@@ -6,10 +6,9 @@
 
 import unittest
 import os
+import configparser
 import test.context  # pylint: disable=unused-import
 import mock
-import six
-from six.moves import configparser
 import duo_client
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
@@ -297,7 +296,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_rawauth:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
-        passcode = six.moves.input('enter a valid passcode: ')
+        passcode = input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
@@ -308,7 +307,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_mfa:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
-        passcode = six.moves.input('enter a valid passcode: ')
+        passcode = input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
@@ -345,7 +344,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_rawauth:
         #     return self.skipTest('because of .deep_testing preference')
-        # passcode = six.moves.input('enter an invalid passcode: ')
+        # passcode = input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -359,7 +358,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_mfa:
         #     return self.skipTest('because of .deep_testing preference')
-        # passcode = six.moves.input('enter an invalid passcode: ')
+        # passcode = input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -437,7 +436,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_main:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
-        passcode = six.moves.input('enter a valid passcode: ')
+        passcode = input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
@@ -462,7 +461,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_main:
         #     return self.skipTest('because of .deep_testing preference')
-        # passcode = six.moves.input('enter an invalid passcode: ')
+        # passcode = input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()

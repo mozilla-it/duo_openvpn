@@ -22,9 +22,9 @@ import datetime
 import socket
 import json
 import syslog
-import iamvpnlibrary
+import configparser
 import pytz
-from six.moves import configparser
+import iamvpnlibrary
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 sys.dont_write_bytecode = True

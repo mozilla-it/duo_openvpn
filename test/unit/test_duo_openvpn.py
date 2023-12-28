@@ -10,8 +10,8 @@ import sys
 import datetime
 import json
 import syslog
+import configparser
 import test.context  # pylint: disable=unused-import
-from six.moves import configparser
 import mock
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials

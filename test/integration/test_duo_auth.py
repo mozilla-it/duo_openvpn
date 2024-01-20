@@ -54,7 +54,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         #
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = self.normal_user
-        user_creds = dict()
+        user_creds = {}
         for varname in OpenVPNCredentials.DUO_RESERVED_WORDS:
             os.environ['password'] = varname
             res = OpenVPNCredentials()
@@ -242,8 +242,7 @@ class TestDuoAPIAuth(unittest.TestCase):
             return self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
-            return self.skipTest('incapable device for {tc}'.format(
-                tc=testcase))
+            return self.skipTest(f'incapable device for {testcase}')
         res = self.library._auth()
         self.assertIsInstance(res, dict,
                               '_auth must return a dict')
@@ -252,21 +251,19 @@ class TestDuoAPIAuth(unittest.TestCase):
         self.assertIn(res['result'], ['allow', 'deny'],
                       '_auth result must be "allow" or "deny"')
         self.assertEqual(res['result'], answer,
-                         '_auth result must be "{ans}"'.format(ans=answer))
+                         f'_auth result must be "{answer}"')
 
     def _mfa_testing_run(self, testcase, answer):
         if not self.deep_test_mfa:  # pragma: no cover
             return self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
-            return self.skipTest('incapable device for {tc}'.format(
-                tc=testcase))
+            return self.skipTest(f'incapable device for {testcase}')
         res = self.library._do_mfa_for_user()
         self.assertIsInstance(res, bool,
                               '_do_mfa_for_user must return a bool')
         self.assertEqual(res, answer,
-                         '_do_mfa_for_user result must '
-                         'be "{ans}"'.format(ans=answer))
+                         f'_do_mfa_for_user result must be "{answer}"')
 
     def test_auth_03(self):
         """ _auth with auto - PLEASE ALLOW """
@@ -411,14 +408,12 @@ class TestDuoAPIAuth(unittest.TestCase):
             return self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
-            return self.skipTest('incapable device for {tc}'.format(
-                tc=testcase))
+            return self.skipTest(f'incapable device for {testcase}')
         res = self.library.main_auth()
         self.assertIsInstance(res, bool,
                               'main_auth must return a bool')
         self.assertEqual(res, answer,
-                         'main_auth result must '
-                         'be "{ans}"'.format(ans=answer))
+                         f'main_auth result must be "{answer}"')
 
     def test_main_03(self):
         """ main_auth with auto - PLEASE ALLOW """

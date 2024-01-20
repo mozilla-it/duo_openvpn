@@ -34,7 +34,7 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
         config.set('duo-credentials', 'IKEY', 'DI9QQ99X9MK4H99RJ9FF')
         config.set('duo-credentials', 'SKEY', '2md9rw5xeyxt8c648dgkmdrg3zpvnhj5b596mgku')
         config.set('duo-credentials', 'HOST', 'api-9f134ff9.duosekurity.com')
-        with open(self.testing_conffile, 'w') as configfile:
+        with open(self.testing_conffile, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
 
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
@@ -46,7 +46,7 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
             self.main_object = DuoOpenVPN()
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        user_creds = dict()
+        user_creds = {}
         for varname in OpenVPNCredentials.DUO_RESERVED_WORDS:
             os.environ['password'] = varname
             res = OpenVPNCredentials()

@@ -43,7 +43,7 @@ class DuoAPIAuth(duo_client.Auth):
         self.log_func = kwargs.pop('log_func', None)
         self.user_config = None
 
-        super(DuoAPIAuth, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def load_user_to_verify(self, user_config):
         """
@@ -84,7 +84,7 @@ class DuoAPIAuth(duo_client.Auth):
             # server timestamp.  So we don't care about the return values.
             self.ping()  # parent-call
         except socket.error as err:
-            self.log(summary='FAIL: DuoAPIAuth ping {}'.format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth ping {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -96,14 +96,14 @@ class DuoAPIAuth(duo_client.Auth):
             self.check()  # parent-call
         except socket.error as err:
             # Super unlikely.  Ping should've hit this.
-            self.log(summary='FAIL: DuoAPIAuth check socket {}'.format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth check socket {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
             return False
         except RuntimeError as err:
             # This is when the call returns a 401:
-            self.log(summary='FAIL: DuoAPIAuth check runtime {}'.format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth check runtime {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -126,16 +126,14 @@ class DuoAPIAuth(duo_client.Auth):
             # parent-call
         except socket.error as err:
             # Super unlikely.  Ping should've hit this.
-            self.log(summary=('FAIL: DuoAPIAuth preauth '
-                              'socket-failed {}').format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth preauth socket-failed {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
             return None
         except RuntimeError as err:
             # This is when the call returns a 400 for bad parameters.
-            self.log(summary=('FAIL: DuoAPIAuth preauth '
-                              'runtime-failed {}').format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth preauth runtime-failed {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -145,8 +143,8 @@ class DuoAPIAuth(duo_client.Auth):
             # We shouldn't need this once
             #   https://github.com/duosecurity/duo_client_python/issues/111
             # is handled
-            self.log(summary=('FAIL: DuoAPIAuth preauth '
-                              'had a failure talking to Duo. {}').format(err),
+            self.log(summary=('FAIL: DuoAPIAuth preauth had a failure '
+                              f'talking to Duo. {err}'),
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -165,10 +163,10 @@ class DuoAPIAuth(duo_client.Auth):
         """
         # The mandatory args are here.  We add more later depending
         # on which factor we're using.
-        passing_args = dict(
-            username=self.user_config.username,
-            factor=self.user_config.factor,
-            ipaddr=self.user_config.client_ipaddr,)
+        passing_args = {
+            'username': self.user_config.username,
+            'factor': self.user_config.factor,
+            'ipaddr': self.user_config.client_ipaddr}
         if self.user_config.factor == 'passcode':
             # Passcode authing must pass the passcode.  Duh.
             passing_args.update(
@@ -194,8 +192,8 @@ class DuoAPIAuth(duo_client.Auth):
         elif self.user_config.factor == 'sms':
             # sms is not an auth mechanism, but is a way to get new codes.
             # This is not our job, so we don't help people out on this.
-            self.log(summary=('FAIL: User "{}" denied for trying '
-                              'sms auth'.format(self.user_config.username)),
+            self.log(summary=(f'FAIL: User "{self.user_config.username}" '
+                              'denied for trying sms auth'),
                      severity='INFO',
                      details={
                          'username': self.user_config.username,
@@ -226,8 +224,7 @@ class DuoAPIAuth(duo_client.Auth):
             res = self.auth(**passing_args)  # parent-call
         except socket.error as err:
             # Super unlikely.  Ping should've hit this.
-            self.log(summary='FAIL: DuoAPIAuth auth '
-                             'socket-failed {}'.format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth auth socket-failed {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -236,8 +233,7 @@ class DuoAPIAuth(duo_client.Auth):
             # This is when the call returns a 400.for bad parameters.
             # This is hard to simulate, as we pre-massage the parameters
             # that go into an auth call, so any failure here is hard to test.
-            self.log(summary='FAIL: DuoAPIAuth auth '
-                             'runtime-failed {}'.format(err),
+            self.log(summary=f'FAIL: DuoAPIAuth auth runtime-failed {err}',
                      details={'error': 'true',
                               'success': 'false', },
                      severity='CRITICAL')
@@ -272,8 +268,8 @@ class DuoAPIAuth(duo_client.Auth):
                          'success': 'false', },)
             return False
         if res['result'] == 'allow':
-            _summary = ('SUCCESS: User "{user}" authenticated by DuoAPIAuth'
-                        '').format(user=self.user_config.username)
+            _summary = (f'SUCCESS: User "{self.user_config.username}" '
+                        'authenticated by DuoAPIAuth')
             self.log(summary=_summary,
                      severity='INFO',
                      details={
@@ -282,9 +278,8 @@ class DuoAPIAuth(duo_client.Auth):
                          'sourceipaddress': self.user_config.client_ipaddr,
                          'success': 'true', },)
             return True
-        _summary = ('FAIL: User "{user}" denied by DuoAPIAuth: '
-                    '{msg}').format(user=self.user_config.username,
-                                    msg=res['status_msg'])
+        _summary = (f'FAIL: User "{self.user_config.username}" '
+                    f'denied by DuoAPIAuth: {res["status_msg"]}')
         self.log(summary=_summary,
                  severity='WARNING',
                  details={
@@ -310,9 +305,8 @@ class DuoAPIAuth(duo_client.Auth):
             # Failed preflight - there's no connection to Duo.
             # Fail safe / fail secure.
             if self._fail_open:
-                self.log(summary=('SUCCESS: Duo failed open, '
-                                  'user "{}" allowed '
-                                  'in'.format(self.user_config.username)),
+                self.log(summary=('SUCCESS: Duo failed open, user '
+                                  f'"{self.user_config.username}" allowed in'),
                          severity='CRITICAL',
                          details={
                              'username': self.user_config.username,
@@ -332,8 +326,8 @@ class DuoAPIAuth(duo_client.Auth):
             # the likely case is that there was a parameter issue, and that
             # means we didn't get an approval, so kick the user out because
             # something is bad.
-            self.log(summary=('FAIL: User "{}" denied due to preauth failure'
-                              ''.format(self.user_config.username)),
+            self.log(summary=(f'FAIL: User "{self.user_config.username}" '
+                              'denied due to preauth failure'),
                      severity='ERROR',
                      details={
                          'username': self.user_config.username,
@@ -356,8 +350,8 @@ class DuoAPIAuth(duo_client.Auth):
             # would check in with Duo, yet be allowed in without doing
             # a MFA proof.  We must return True since they're approved,
             # but it's an unusual case to come across.
-            self.log(summary=('SUCCESS: User "{}" allowed without MFA'
-                              ''.format(self.user_config.username)),
+            self.log(summary=(f'SUCCESS: User "{self.user_config.username}" '
+                              'allowed without MFA'),
                      severity='INFO',
                      details={
                          'username': self.user_config.username,
@@ -369,9 +363,8 @@ class DuoAPIAuth(duo_client.Auth):
             # The key here is, this must return False to indicate a failed
             # login attempt.
             # It's not our job to enroll, so kick them out.
-            self.log(summary=('FAIL: Unexpected/non-enrolled Duo '
-                              'user "{}" denied'
-                              ''.format(self.user_config.username)),
+            self.log(summary=('FAIL: Unexpected/non-enrolled Duo user '
+                              f'"{self.user_config.username}" denied'),
                      severity='INFO',
                      details={
                          'username': self.user_config.username,
@@ -382,8 +375,8 @@ class DuoAPIAuth(duo_client.Auth):
             # We do not have a perpetually-locked-out user to test against.
             # The key here is, this must return False to indicate a failed
             # login attempt.
-            self.log(summary=('FAIL: User "{}" explicitly denied by Duo'
-                              ''.format(self.user_config.username)),
+            self.log(summary=(f'FAIL: User "{self.user_config.username}" '
+                              'explicitly denied by Duo'),
                      severity='INFO',
                      details={
                          'username': self.user_config.username,
@@ -405,8 +398,7 @@ class DuoAPIAuth(duo_client.Auth):
             # and will log when it gets answers
             return self._do_mfa_for_user()
         # The reply from Duo is unknown.  Probably an API changed.
-        _summary = ('FAIL: Unexpected result from DuoAPIAuth: '
-                    '{msg}').format(msg=preauth['result'])
+        _summary = f'FAIL: Unexpected result from DuoAPIAuth: {preauth["result"]}'
         self.log(summary=_summary,
                  severity='ERROR',
                  details={

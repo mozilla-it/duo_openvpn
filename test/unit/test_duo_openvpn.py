@@ -42,7 +42,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         config.set('duo-credentials', 'IKEY', 'DI9QQ99X9MK4H99RJ9FF')
         config.set('duo-credentials', 'SKEY', '2md9rw5xeyxt8c648dgkmdrg3zpvnhj5b596mgku')
         config.set('duo-credentials', 'HOST', 'api-9f134ff9.duosekurity.com')
-        with open(self.testing_conffile, 'w') as configfile:
+        with open(self.testing_conffile, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
                                new=[self.testing_conffile]):
@@ -81,7 +81,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
     def test_06_ingest_config_from_file(self):
         """ With an actual config file, get a populated ConfigParser """
         test_reading_file = '/tmp/test-reader.txt'
-        with open(test_reading_file, 'w') as filepointer:
+        with open(test_reading_file, 'w', encoding='utf-8') as filepointer:
             filepointer.write('[aa]\nbb = cc\n')
         filepointer.close()
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
@@ -120,7 +120,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         config.add_section('duo-openvpn')
         config.set('duo-openvpn', 'syslog-events-send', 'True')
         config.set('duo-openvpn', 'syslog-events-facility', 'local5')
-        with open(self.testing_conffile, 'w') as configfile:
+        with open(self.testing_conffile, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
                                new=[self.testing_conffile]):
@@ -144,7 +144,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         config.set('duo-behavior', 'duo-timeout', '-5')
         config.add_section('duo-openvpn')
         config.set('duo-openvpn', 'syslog-events-facility', 'junk')
-        with open(self.testing_conffile, 'w') as configfile:
+        with open(self.testing_conffile, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
                                new=[self.testing_conffile]):
@@ -164,7 +164,8 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
     def test_11_log_send(self):
         ''' Test the log method tries to send '''
         datetime_mock = mock.Mock(wraps=datetime.datetime)
-        datetime_mock.now.return_value = datetime.datetime(2020, 12, 25, 13, 14, 15, 123456, tzinfo=datetime.timezone.utc)
+        datetime_mock.now.return_value = datetime.datetime(2020, 12, 25, 13, 14, 15, 123456,
+                                                           tzinfo=datetime.timezone.utc)
         self.library.event_send = True
         self.library.event_facility = syslog.LOG_LOCAL1
         with mock.patch('syslog.openlog') as mock_openlog, \

@@ -83,7 +83,7 @@ class DuoOpenVPN(object):
         except (configparser.NoOptionError, configparser.NoSectionError):
             _base_facility = 'auth'
         try:
-            self.event_facility = getattr(syslog, 'LOG_{}'.format(_base_facility.upper()))
+            self.event_facility = getattr(syslog, f'LOG_{_base_facility.upper()}')
         except (AttributeError):
             self.event_facility = syslog.LOG_AUTH
 
@@ -180,8 +180,8 @@ class DuoOpenVPN(object):
             # Here we have a user not allowed to VPN in at all.
             # This is some form of "their account is disabled" and/or
             # they aren't in the approved ACL list.
-            self.log(summary=('FAIL: VPN user "{}" denied for not being '
-                              'allowed to use the VPN'.format(username)),
+            self.log(summary=(f'FAIL: VPN user "{username}" denied for '
+                              'not being allowed to use the VPN'),
                      severity='INFO',
                      details={'username': username,
                               'sourceipaddress': client_ipaddr,
@@ -220,7 +220,8 @@ class DuoOpenVPN(object):
         if session_state is None:
             # No variable was sent: we're not in external-auth mode.  We're not authoritative.
             pass
-        elif session_state in ['Initial', 'Expired', 'Invalid', 'AuthenticatedEmptyUser', 'ExpiredEmptyUser']:
+        elif session_state in ['Initial', 'Expired', 'Invalid',
+                               'AuthenticatedEmptyUser', 'ExpiredEmptyUser']:
             # We are in a state where we haven't been approved by the server.  Ask Duo.
             pass
         elif session_state in ['Authenticated']:

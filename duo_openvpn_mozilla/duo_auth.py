@@ -248,7 +248,7 @@ class DuoAPIAuth(duo_client.Auth):
             the auth function.
 
             Return True if the user may connect.
-            Return Frue if the user may not connect.
+            Return False if the user may not connect.
             You must make a choice, and should not raise.
         """
         res = self._auth()
@@ -298,7 +298,7 @@ class DuoAPIAuth(duo_client.Auth):
             if the user is allowed to connect or not.
 
             Return True if the user may connect.
-            Return Frue if the user may not connect.
+            Return False if the user may not connect.
             You must make a choice, and should not raise.
         """
         if not self._preflight():

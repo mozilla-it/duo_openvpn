@@ -6,20 +6,16 @@
 
 import unittest
 import os
-import sys
 import datetime
 import json
 import syslog
 import configparser
+from io import StringIO
 import test.context  # pylint: disable=unused-import
 import mock
 from duo_openvpn_mozilla.duo_auth import DuoAPIAuth
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN, DuoTimeoutError
-if sys.version_info.major >= 3:
-    from io import StringIO  # pragma: no cover
-else:
-    from io import BytesIO as StringIO  # pragma: no cover
 
 
 class TestDuoOpenVPNUnit(unittest.TestCase):
@@ -28,7 +24,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         DuoOpenVPN class without going out to Duo.
     """
 
-    testing_conffile = '/tmp/TestDuoOpenVPNUnit.txt'
+    testing_conffile = '/tmp/TestDuoOpenVPNUnit.txt'  # nosec hardcoded_tmp_directory
 
     def setUp(self):
         """ Preparing test rig """
@@ -66,8 +62,9 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
 
     def test_04_ingest_no_config_file(self):
         """ With all missing config files, get an exception """
+        _not_a_real_file = '/tmp/no-such-file.txt'  # nosec hardcoded_tmp_directory
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
-                               new=['/tmp/no-such-file.txt']):
+                               new=[_not_a_real_file]):
             with self.assertRaises(IOError):
                 self.library._ingest_config_from_file()
 
@@ -80,12 +77,13 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
 
     def test_06_ingest_config_from_file(self):
         """ With an actual config file, get a populated ConfigParser """
-        test_reading_file = '/tmp/test-reader.txt'
+        _not_a_real_file = '/tmp/no-such-file.txt'  # nosec hardcoded_tmp_directory
+        test_reading_file = '/tmp/test-reader.txt'  # nosec hardcoded_tmp_directory
         with open(test_reading_file, 'w', encoding='utf-8') as filepointer:
             filepointer.write('[aa]\nbb = cc\n')
         filepointer.close()
         with mock.patch.object(DuoOpenVPN, 'CONFIG_FILE_LOCATIONS',
-                               new=['/tmp/no-such-file.txt', test_reading_file]):
+                               new=[_not_a_real_file, test_reading_file]):
             result = self.library._ingest_config_from_file()
         os.remove(test_reading_file)
         self.assertIsInstance(result, configparser.ConfigParser,
@@ -248,7 +246,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         """ 1fa user with a 2fa / bonkers 'password' """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'push'
+        os.environ['password'] = 'push'  # nosec hardcoded_password_string
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
             with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
                     mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
@@ -264,7 +262,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         """ 1fa user with a bad password """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'hunter2'
+        os.environ['password'] = 'hunter2'  # nosec hardcoded_password_string
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
             with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
                     mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',
@@ -282,7 +280,7 @@ class TestDuoOpenVPNUnit(unittest.TestCase):
         """ 1fa user with a good password """
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = 'bob'
-        os.environ['password'] = 'hunter2'
+        os.environ['password'] = 'hunter2'  # nosec hardcoded_password_string
         with mock.patch.object(DuoOpenVPN, 'log') as mock_log:
             with mock.patch('iamvpnlibrary.IAMVPNLibrary') as mock_iam, \
                     mock.patch.object(mock_iam.return_value, 'user_allowed_to_vpn',

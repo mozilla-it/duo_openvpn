@@ -89,11 +89,9 @@ class OpenVPNCredentials(object):
             __unsafe_username = ''
 
         # the environmental variable 'password' is what they typed in/sent.
-        __password = os.environ.get('password')
-        if __password is None:
-            __password = ''
+        __password = os.environ.get('password', '')
 
-        if __unsafe_username != '' and __password == '':
+        if __unsafe_username != '' and __password == '':  # nosec hardcoded_password_string
             # At this step, we have a username of some sort, but no password.
             #
             # Based on changes dating back to 2015, as an aid to

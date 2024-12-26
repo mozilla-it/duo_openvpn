@@ -23,7 +23,7 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
         DuoAPIAuth class without going out to Duo.
     """
 
-    testing_conffile = '/tmp/TestDuoAPIAuthUnit.txt'
+    testing_conffile = '/tmp/TestDuoAPIAuthUnit.txt'  # nosec hardcoded_tmp_directory
 
     def setUp(self):
         """ Preparing test rig """
@@ -288,7 +288,7 @@ class TestDuoAPIAuthUnit(unittest.TestCase):
 
     def test_34_auth_passcode(self):
         """ Test passcode on auth checks. """
-        os.environ['password'] = '123456'
+        os.environ['password'] = '123456'  # nosec hardcoded_password_string
         creds = OpenVPNCredentials()
         creds.load_variables_from_environment()
         self.library.user_config = creds

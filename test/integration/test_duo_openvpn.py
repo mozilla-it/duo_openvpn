@@ -69,7 +69,7 @@ class TestDuoOpenVPN(unittest.TestCase):
     def test_bogus_user(self):
         """ A bogus user is denied """
         os.environ['common_name'] = 'user-who-does-not-exist'
-        os.environ['password'] = 'push'
+        os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
         res = library.main_authentication()
         self.assertFalse(res, 'invalid users must be denied')
@@ -81,7 +81,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         if not self.one_fa_user:  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
         os.environ['common_name'] = self.one_fa_user
-        os.environ['password'] = 'push'
+        os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
         res = library.main_authentication()
         self.assertFalse(res, '1fa user attempting to 2fa must be denied')
@@ -91,7 +91,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         if not self.one_fa_user:  # pragma: no cover
             return self.skipTest('No testing/one_fa_user defined')
         os.environ['common_name'] = self.one_fa_user
-        os.environ['password'] = 'a-bad-password'
+        os.environ['password'] = 'a-bad-password'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
         res = library.main_authentication()
         self.assertFalse(res, '1fa user with bad password must be denied')
@@ -115,7 +115,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         if not self.normal_user:  # pragma: no cover
             return self.skipTest('No testing/normal_user defined')
         os.environ['common_name'] = self.normal_user
-        os.environ['password'] = 'push'
+        os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
         res = library.main_authentication()
         self.assertFalse(res, '2fa user with a deny must be False')
@@ -127,7 +127,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         if not self.normal_user:  # pragma: no cover
             return self.skipTest('No testing/normal_user defined')
         os.environ['common_name'] = self.normal_user
-        os.environ['password'] = 'push'
+        os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
         res = library.main_authentication()
         self.assertTrue(res, '2fa user with an allow must be True')

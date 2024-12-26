@@ -166,7 +166,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         """ user '' pass '' """
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = ''
-        os.environ['password'] = ''
+        os.environ['password'] = ''  # nosec hardcoded_password_string
         self.library.load_variables_from_environment()
         self.assertTrue(self.library.is_valid())
         self.assertEqual(self.library.username, self.realish_user)
@@ -243,7 +243,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_06(self):
         """ user '' pass a_pa:ss:wo:rd """
-        _pass = 'some:password'
+        _pass = 'some:password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = ''
         os.environ['password'] = _pass
@@ -256,7 +256,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_07(self):
         """ user '' pass a_password """
-        _pass = 'some_password'
+        _pass = 'some_password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = ''
         os.environ['password'] = _pass
@@ -277,7 +277,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
         for wordu in list(self.library.DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
-            os.environ['password'] = ''
+            os.environ['password'] = ''  # nosec hardcoded_password_string
             self.library.load_variables_from_environment()
             self.assertTrue(self.library.is_valid())
             self.assertEqual(self.library.username, self.realish_user)
@@ -359,7 +359,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_16(self):
         """ user DUO_RESERVED_WORDS pass a_pa:ss:wo:rd """
-        _pass = 'some:password'
+        _pass = 'some:password'  # nosec hardcoded_password_string
         for wordu in list(self.library.DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
@@ -373,7 +373,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_17(self):
         """ user DUO_RESERVED_WORDS pass a_password """
-        _pass = 'some_password'
+        _pass = 'some_password'  # nosec hardcoded_password_string
         for wordu in list(self.library.DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
@@ -403,7 +403,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         # or have a non-factor result.  So:
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = 'someuser'
-        os.environ['password'] = ''
+        os.environ['password'] = ''  # nosec hardcoded_password_string
         try:
             self.library.load_variables_from_environment()
         except ValueError:  # pragma: no cover
@@ -487,7 +487,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_26(self):
         """ user someuser pass a_pa:ss:wo:rd """
-        _pass = 'some:password'
+        _pass = 'some:password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = 'someuser'
         os.environ['password'] = _pass
@@ -500,7 +500,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_27(self):
         """ user someuser pass a_password """
-        _pass = 'some_password'
+        _pass = 'some_password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
         os.environ['username'] = 'someuser'
         os.environ['password'] = _pass

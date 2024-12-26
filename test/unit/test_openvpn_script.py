@@ -6,16 +6,12 @@
 
 import unittest
 import os
-import sys
 import time
 import test.context  # pylint: disable=unused-import
+from io import StringIO
 import mock
 import duo_openvpn
 from duo_openvpn_mozilla import DuoOpenVPN  # pylint: disable=unused-import
-if sys.version_info.major >= 3:
-    from io import StringIO  # pragma: no cover
-else:
-    from io import BytesIO as StringIO  # pragma: no cover
 
 
 class TestOpenVPNScript(unittest.TestCase):
@@ -32,7 +28,7 @@ class TestOpenVPNScript(unittest.TestCase):
 
     def test_05_write_failed(self):
         """ When we can't write out auth_control_file, we must die """
-        os.environ['auth_control_file'] = '/tmp/foo'
+        os.environ['auth_control_file'] = '/tmp/foo'  # nosec hardcoded_tmp_directory
         with mock.patch('duo_openvpn.DuoOpenVPN'), \
                 self.assertRaises(SystemExit) as exiting, \
                 mock.patch('duo_openvpn.open', create=True, side_effect=IOError):
@@ -41,7 +37,7 @@ class TestOpenVPNScript(unittest.TestCase):
 
     def test_10_access_denied(self):
         """ When auth is refused, don't let someone in. """
-        os.environ['auth_control_file'] = '/tmp/foo'
+        os.environ['auth_control_file'] = '/tmp/foo'  # nosec hardcoded_tmp_directory
         with mock.patch('duo_openvpn.DuoOpenVPN') as mock_duo, \
                 self.assertRaises(SystemExit) as exiting, \
                 mock.patch('duo_openvpn.open', create=True,
@@ -54,7 +50,7 @@ class TestOpenVPNScript(unittest.TestCase):
 
     def test_11_access_granted(self):
         """ When auth is allowed, let someone in. """
-        os.environ['auth_control_file'] = '/tmp/foo'
+        os.environ['auth_control_file'] = '/tmp/foo'  # nosec hardcoded_tmp_directory
         with mock.patch('duo_openvpn.DuoOpenVPN') as mock_duo, \
                 self.assertRaises(SystemExit) as exiting, \
                 mock.patch('duo_openvpn.open', create=True,
@@ -67,7 +63,7 @@ class TestOpenVPNScript(unittest.TestCase):
 
     def test_12_access_timeout(self):
         """ When Duo is down, handle it well. """
-        os.environ['auth_control_file'] = '/tmp/foo'
+        os.environ['auth_control_file'] = '/tmp/foo'  # nosec hardcoded_tmp_directory
         def too_slow_authentication():
             '''
                 This function is waiting 5 seconds and the responding true.

@@ -92,7 +92,7 @@ install:
 
 clean:
 	rm -f *.pyc test/*.pyc $(PACKAGE)/*.pyc
-	rm -rf __pycache__
+	rm -rf __pycache__ test/__pycache__
 	rm -rf dist sdist build
 	rm -rf $(PACKAGE).egg-info
 	rm -rf tmp

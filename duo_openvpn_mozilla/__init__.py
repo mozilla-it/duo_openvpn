@@ -32,7 +32,7 @@ sys.dont_write_bytecode = True
 class DuoTimeoutError(Exception):
     ''' Just an exception to indicate we timed out talking to Duo '''
 
-class DuoOpenVPN(object):
+class DuoOpenVPN:
     """
         This is mainly implemented as a class because it's an easier way to
         keep track of our config-file based configuration.  For the most part
@@ -84,7 +84,7 @@ class DuoOpenVPN(object):
             _base_facility = 'auth'
         try:
             self.event_facility = getattr(syslog, f'LOG_{_base_facility.upper()}')
-        except (AttributeError):
+        except AttributeError:
             self.event_facility = syslog.LOG_AUTH
 
     def _ingest_config_from_file(self):
@@ -97,7 +97,7 @@ class DuoOpenVPN(object):
                 try:
                     config.read(filename)
                     break
-                except (configparser.Error):
+                except configparser.Error:
                     pass
         else:
             # We deliberately fail out here rather than try to

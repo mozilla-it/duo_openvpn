@@ -79,7 +79,7 @@ class TestDuoOpenVPN(unittest.TestCase):
         # This is a weird test that stems from a 1FA user pretending to
         # have a Duo.
         if not self.one_fa_user:  # pragma: no cover
-            return self.skipTest('No testing/one_fa_user defined')
+            self.skipTest('No testing/one_fa_user defined')
         os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
@@ -89,7 +89,7 @@ class TestDuoOpenVPN(unittest.TestCase):
     def test_1fa_user_bad_pw(self):
         """ A 1FA user with a bad password fails """
         if not self.one_fa_user:  # pragma: no cover
-            return self.skipTest('No testing/one_fa_user defined')
+            self.skipTest('No testing/one_fa_user defined')
         os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = 'a-bad-password'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
@@ -99,9 +99,9 @@ class TestDuoOpenVPN(unittest.TestCase):
     def test_1fa_user_good_pw(self):
         """ A 1FA user with a good password works """
         if not self.one_fa_user:  # pragma: no cover
-            return self.skipTest('No testing/one_fa_user defined')
+            self.skipTest('No testing/one_fa_user defined')
         if not self.one_fa_pass:  # pragma: no cover
-            return self.skipTest('No testing/one_fa_pass defined')
+            self.skipTest('No testing/one_fa_pass defined')
         os.environ['common_name'] = self.one_fa_user
         os.environ['password'] = self.one_fa_pass
         library = DuoOpenVPN()
@@ -111,9 +111,9 @@ class TestDuoOpenVPN(unittest.TestCase):
     def test_2fa_user_bad(self):
         """ A 2FA user with a bad push fails  PLEASE DENY """
         if not self.deep_test_main:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         if not self.normal_user:  # pragma: no cover
-            return self.skipTest('No testing/normal_user defined')
+            self.skipTest('No testing/normal_user defined')
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()
@@ -123,9 +123,9 @@ class TestDuoOpenVPN(unittest.TestCase):
     def test_2fa_user_good(self):
         """ A 2FA user with a bad push fails  PLEASE ALLOW """
         if not self.deep_test_main:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         if not self.normal_user:  # pragma: no cover
-            return self.skipTest('No testing/normal_user defined')
+            self.skipTest('No testing/normal_user defined')
         os.environ['common_name'] = self.normal_user
         os.environ['password'] = 'push'  # nosec hardcoded_password_string
         library = DuoOpenVPN()

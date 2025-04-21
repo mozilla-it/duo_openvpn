@@ -10,7 +10,7 @@ import test.context  # pylint: disable=unused-import
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 
 
-class CredentialsTestMixin(object):
+class CredentialsTestMixin:
     """
         These are intended to exercise internal functions of the library's
         OpenVPNCredentials class.

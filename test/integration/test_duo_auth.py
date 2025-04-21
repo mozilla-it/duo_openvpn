@@ -35,7 +35,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         try:
             self.normal_user = self.main_object.configfile.get('testing', 'normal_user')
         except (configparser.NoOptionError, configparser.NoSectionError):  # pragma: no cover
-            return self.skipTest('No testing/normal_user defined')
+            self.skipTest('No testing/normal_user defined')
         try:
             self.deep_test_rawauth = self.main_object.configfile.getboolean(
                 'testing', 'deep_testing_rawauth')
@@ -142,7 +142,7 @@ class TestDuoAPIAuth(unittest.TestCase):
     def test_preflight_02(self):
         """ preflight fails for bad skey """
         if not self.deep_test_rawauth:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         self.main_object.duo_client_args['skey'] = 'wrong-passcode'
         tmplibrary = DuoAPIAuth(**self.main_object.duo_client_args)
         # No user data needs to be loaded to be preflighted
@@ -239,10 +239,10 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def _auth_testing_run(self, testcase, answer):
         if not self.deep_test_rawauth:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
-            return self.skipTest(f'incapable device for {testcase}')
+            self.skipTest(f'incapable device for {testcase}')
         res = self.library._auth()
         self.assertIsInstance(res, dict,
                               '_auth must return a dict')
@@ -255,10 +255,10 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def _mfa_testing_run(self, testcase, answer):
         if not self.deep_test_mfa:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
-            return self.skipTest(f'incapable device for {testcase}')
+            self.skipTest(f'incapable device for {testcase}')
         res = self.library._do_mfa_for_user()
         self.assertIsInstance(res, bool,
                               '_do_mfa_for_user must return a bool')
@@ -292,7 +292,7 @@ class TestDuoAPIAuth(unittest.TestCase):
     def test_auth_06(self):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_rawauth:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         passcode = input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -303,7 +303,7 @@ class TestDuoAPIAuth(unittest.TestCase):
     def test_mfa_06(self):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_mfa:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         passcode = input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -340,7 +340,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # We are going to play the 1-in-a-million odds here and save
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_rawauth:
-        #     return self.skipTest('because of .deep_testing preference')
+        #     self.skipTest('because of .deep_testing preference')
         # passcode = input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
@@ -354,7 +354,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # We are going to play the 1-in-a-million odds here and save
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_mfa:
-        #     return self.skipTest('because of .deep_testing preference')
+        #     self.skipTest('because of .deep_testing preference')
         # passcode = input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode
@@ -405,10 +405,10 @@ class TestDuoAPIAuth(unittest.TestCase):
 
     def _main_testing_run(self, testcase, answer):
         if not self.deep_test_main:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         self.library.load_user_to_verify(self.user_data[testcase])
         if testcase != 'passcode' and not self._can_we_run_a_test(testcase):
-            return self.skipTest(f'incapable device for {testcase}')
+            self.skipTest(f'incapable device for {testcase}')
         res = self.library.main_auth()
         self.assertIsInstance(res, bool,
                               'main_auth must return a bool')
@@ -430,7 +430,7 @@ class TestDuoAPIAuth(unittest.TestCase):
     def test_main_06(self):
         """ _auth with VALID PASSCODE """
         if not self.deep_test_main:  # pragma: no cover
-            return self.skipTest('because of .deep_testing preference')
+            self.skipTest('because of .deep_testing preference')
         passcode = input('enter a valid passcode: ')
         os.environ['password'] = passcode
         creds = OpenVPNCredentials()
@@ -455,7 +455,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # We are going to play the 1-in-a-million odds here and save
         # a click.  Change up the lines if you hate this.
         # if not self.deep_test_main:
-        #     return self.skipTest('because of .deep_testing preference')
+        #     self.skipTest('because of .deep_testing preference')
         # passcode = input('enter an invalid passcode: ')
         passcode = '000000'
         os.environ['password'] = passcode

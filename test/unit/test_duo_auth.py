@@ -17,7 +17,7 @@ from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN
 
 
-class TestDuoAPIAuthUnit(unittest.TestCase):
+class TestDuoAPIAuthUnit(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """
         These are intended to exercise internal functions of the library's
         DuoAPIAuth class without going out to Duo.

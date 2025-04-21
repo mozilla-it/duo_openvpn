@@ -15,7 +15,7 @@ import os
 sys.dont_write_bytecode = True
 
 
-class OpenVPNCredentials(object):
+class OpenVPNCredentials:
     # pylint: disable=too-few-public-methods
     """
         This class consists of the parsed-out credentials passed in by

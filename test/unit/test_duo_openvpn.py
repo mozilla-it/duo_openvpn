@@ -18,7 +18,7 @@ from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 from duo_openvpn_mozilla import DuoOpenVPN, DuoTimeoutError
 
 
-class TestDuoOpenVPNUnit(unittest.TestCase):
+class TestDuoOpenVPNUnit(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """
         These are intended to exercise internal functions of the library's
         DuoOpenVPN class without going out to Duo.

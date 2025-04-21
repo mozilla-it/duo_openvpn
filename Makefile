@@ -2,7 +2,7 @@ INSTALL := install
 DESTDIR := /
 PREFIX  := /usr
 PACKAGE := duo_openvpn_mozilla
-VERSION := 1.4.4
+VERSION := 1.5.0
 ITERATION := 1
 .DEFAULT: test
 .PHONY: test coverage coveragereport pep8 pylint pythonrpm pluginrpm rpm pythonrpm pythonrpm2 pythonrpm3 deb pypi install clean

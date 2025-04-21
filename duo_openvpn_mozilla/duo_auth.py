@@ -19,6 +19,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Contributors: gdestuynder@mozilla.com
 import sys
+import re
 import socket
 import http.client
 import duo_client
@@ -41,9 +42,19 @@ class DuoAPIAuth(duo_client.Auth):
         self.hostname = socket.gethostname()
         self._fail_open = kwargs.pop('fail_open', False)
         self.log_func = kwargs.pop('log_func', None)
+        proxy_config = kwargs.pop('proxy_config', {})
         self.user_config = None
 
         super().__init__(*args, **kwargs)
+
+        if proxy_config.get('use_proxy'):
+            # the Auth function's proxy in duo_client is terrible.  I have made this code difficult,
+            # because I want to make the puppet code not-terrible.  Sorry world.
+            base_proxy = proxy_config['https_proxy']
+            proxymatch = re.match(r'^https?://([^:]+):(\d+)/?$', base_proxy)
+            (proxyhost, proxyport) = proxymatch.groups()
+            self.set_proxy(proxyhost, port=proxyport)
+
 
     def load_user_to_verify(self, user_config):
         """

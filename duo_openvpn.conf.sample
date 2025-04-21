@@ -30,6 +30,11 @@ syslog-events-send = False
 syslog-events-facility = local5
 
 
+[proxy]
+use_proxy = False
+https_proxy = http://proxy.example.com:3128
+
+
 [testing]
 # The 'testing' section contains information for the integration tests.
 # A production instance can/should empty this.

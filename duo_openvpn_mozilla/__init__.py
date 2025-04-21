@@ -87,6 +87,17 @@ class DuoOpenVPN:
         except AttributeError:
             self.event_facility = syslog.LOG_AUTH
 
+        proxy_config = {'use_proxy': False}
+        try:
+            proxy_config['use_proxy'] = self.configfile.getboolean('proxy', 'use_proxy')
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            pass
+        try:
+            proxy_config['https_proxy'] = self.configfile.get('proxy', 'https_proxy')
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            pass
+        self.proxy_config = proxy_config
+
     def _ingest_config_from_file(self):
         """
             pull in config variables from a system file
@@ -249,6 +260,7 @@ class DuoOpenVPN:
         # We don't establish a Duo object until we need it.
         duo = DuoAPIAuth(fail_open=self.failopen,
                          log_func=self.log,
+                         proxy_config=self.proxy_config,
                          **self.duo_client_args)
 
         if not duo.load_user_to_verify(user_config=user_data):

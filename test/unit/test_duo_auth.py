@@ -34,6 +34,9 @@ class TestDuoAPIAuthUnit(unittest.TestCase):  # pylint: disable=too-many-public-
         config.set('duo-credentials', 'IKEY', 'DI9QQ99X9MK4H99RJ9FF')
         config.set('duo-credentials', 'SKEY', '2md9rw5xeyxt8c648dgkmdrg3zpvnhj5b596mgku')
         config.set('duo-credentials', 'HOST', 'api-9f134ff9.duosekurity.com')
+        config.add_section('proxy')
+        config.set('proxy', 'use_proxy', 'True')
+        config.set('proxy', 'https_proxy', 'http://proxy.example.com:3128')
         with open(self.testing_conffile, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
 
@@ -60,7 +63,8 @@ class TestDuoAPIAuthUnit(unittest.TestCase):  # pylint: disable=too-many-public-
                                     '/etc/openvpn/duo_openvpn.conf',
                                     '/etc/duo_openvpn.conf',
                                     self.testing_conffile]):
-            self.library = DuoAPIAuth(**self.main_object.duo_client_args)
+            self.library = DuoAPIAuth(proxy_config=self.main_object.proxy_config,
+                                      **self.main_object.duo_client_args)
 
     def tearDown(self):
         """ Clear the env so we don't impact other tests """

@@ -53,8 +53,8 @@ pep8:
 	@find ./* `git submodule --quiet foreach 'echo -n "-path ./$$path -prune -o "'` -type f -name '*.py' -exec pep8 --show-source --max-line-length=100 {} \;
 
 pylint:
-	@find ./$(PACKAGE) -path ./test -prune -o -type f -name '*.py' -exec pylint -r no --disable=useless-object-inheritance,superfluous-parens --rcfile=/dev/null {} \;
-	@find ./test -type f -name '*.py' -exec pylint -r no --disable=useless-object-inheritance,protected-access,locally-disabled,inconsistent-return-statements --rcfile=/dev/null {} \;
+	@find ./$(PACKAGE) -path ./test -prune -o -type f -name '*.py' -exec pylint -r no --disable=import-error --rcfile=/dev/null {} \;
+	@find ./test -type f -name '*.py' -exec pylint -r no --disable=import-error,protected-access,locally-disabled --rcfile=/dev/null {} \;
 
 pythonrpm:  $(RPM_MAKE_TARGET)
 

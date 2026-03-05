@@ -21,7 +21,7 @@ class OpenVPNCredentials:
         This class consists of the parsed-out credentials passed in by
         openvpn.  If we have garbage-in, __init__ will return early and
         is_valid will be false.  It would help to check
-        https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage
+        https://openvpn.net/community-docs/community-articles/openvpn-2-6-manual.html
         in its 'Environmental Variables' section.
 
         We end up with a class object that has attributes:
@@ -37,7 +37,7 @@ class OpenVPNCredentials:
     """
 
     DUO_RESERVED_WORDS = set(['auto', 'push', 'sms', 'phone'])
-    # Cite: https://duo.com/docs/authapi#/auth
+    # Cite: https://duo.com/docs/authapi#auth
     # These are the reserved words that are 'factor's by which Duo
     # can solicit you for auth passcodes.  We strip out 'passcode'
     # because that factor is not Duo-specific.  It's you providing
@@ -118,7 +118,7 @@ class OpenVPNCredentials:
         # never happen in this day and age of complex passwords.
         if __password in self.__class__.DUO_RESERVED_WORDS:
             # Their 'password' was one of the Duo reserved words.
-            # Cite: https://duo.com/docs/authapi#/auth
+            # Cite: https://duo.com/docs/authapi#auth
             # We can't accept bareword 'passcode' because, well,
             # they would have to send a passcode.  XXXXXX code, and literal
             # 'passcode:XXXXXX' is accepted in the ELSE below.

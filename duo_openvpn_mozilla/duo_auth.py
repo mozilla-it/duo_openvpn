@@ -90,7 +90,7 @@ class DuoAPIAuth(duo_client.Auth):
         """
         try:
             # See if we can reach the server.
-            # https://duo.com/docs/authapi#/ping
+            # https://duo.com/docs/authapi#ping
             # This either works or explodes, and all it returns is a
             # server timestamp.  So we don't care about the return values.
             self.ping()  # parent-call
@@ -103,7 +103,7 @@ class DuoAPIAuth(duo_client.Auth):
 
         try:
             # See if we have valid keys to use on the server.
-            # https://duo.com/docs/authapi#/check
+            # https://duo.com/docs/authapi#check
             self.check()  # parent-call
         except socket.error as err:
             # Super unlikely.  Ping should've hit this.
@@ -131,7 +131,7 @@ class DuoAPIAuth(duo_client.Auth):
             Will raise out if you haven't hit load_user_to_verify before.
         """
         try:
-            # https://duo.com/docs/authapi#/preauth
+            # https://duo.com/docs/authapi#preauth
             res = self.preauth(username=self.user_config.username,
                                ipaddr=self.user_config.client_ipaddr)
             # parent-call
@@ -195,7 +195,7 @@ class DuoAPIAuth(duo_client.Auth):
             # from the VPN which device to use from multiple, 'auto' is our
             # best/only bet.  The other parameters are just using some of
             # the niceties that the push form offers us.
-            # -- https://duo.com/docs/authapi#/auth
+            # -- https://duo.com/docs/authapi#auth
             passing_args.update(
                 device='auto',
                 type='OpenVPN login',
@@ -231,7 +231,7 @@ class DuoAPIAuth(duo_client.Auth):
             return None
 
         try:
-            # https://duo.com/docs/authapi#/auth
+            # https://duo.com/docs/authapi#auth
             res = self.auth(**passing_args)  # parent-call
         except socket.error as err:
             # Super unlikely.  Ping should've hit this.

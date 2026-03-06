@@ -22,7 +22,7 @@ ifneq (, $(PLAIN_PYTHON))
 endif
 
 COVERAGE2 = $(shell which coverage 2>/dev/null)
-COVERAGE3 = $(shell which coverage-3 2>/dev/null)
+COVERAGE3 = $(shell which coverage3 2>/dev/null)
 ifneq (, $(COVERAGE2))
   COVERAGE = $(COVERAGE2)
 endif
@@ -92,7 +92,7 @@ install:
 
 clean:
 	rm -f *.pyc test/*.pyc $(PACKAGE)/*.pyc
-	rm -rf __pycache__ test/__pycache__
+	rm -rf __pycache__ test/__pycache__ test/integration/__pycache__ test/unit/__pycache__
 	rm -rf dist sdist build
 	rm -rf $(PACKAGE).egg-info
 	rm -rf tmp

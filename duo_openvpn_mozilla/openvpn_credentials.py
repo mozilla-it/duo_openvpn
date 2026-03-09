@@ -12,6 +12,7 @@
 # Contributors: gdestuynder@mozilla.com
 import sys
 import os
+import re
 sys.dont_write_bytecode = True
 
 
@@ -36,7 +37,10 @@ class OpenVPNCredentials:
         checks on the data for sanity.
     """
 
-    DUO_RESERVED_WORDS = set(['auto', 'push', 'sms', 'phone'])
+    DUO_RESERVED_REGEXPS = set([r'^(auto)$',
+                                r'^(push)(?:\d+)?$',
+                                r'^(sms)(?:\d+)?$',
+                                r'^(phone)(?:\d+)?$'])
     # Cite: https://duo.com/docs/authapi#auth
     # These are the reserved words that are 'factor's by which Duo
     # can solicit you for auth passcodes.  We strip out 'passcode'
@@ -57,7 +61,7 @@ class OpenVPNCredentials:
         # We're invalid until we load variables
         self.valid = False
 
-    def load_variables_from_environment(self):
+    def load_variables_from_environment(self):  # pylint: disable=too-many-branches,too-many-statements
         """
             This function reads in the environmental variables
             and begins to make decisions about them, validating the inputs to
@@ -107,28 +111,37 @@ class OpenVPNCredentials:
             # Here we shuffle the 'username' to the password area.
             # This makes us do searching on the credentials in
             # the next clause.
-            if (self.is_a_passcode(__unsafe_username) or
-                    __unsafe_username in self.__class__.DUO_RESERVED_WORDS):
+            if self.is_a_passcode(__unsafe_username):
                 __password = __unsafe_username
                 __unsafe_username = ''
+            else:
+                for regex in self.__class__.DUO_RESERVED_REGEXPS:
+                    duo_search = re.search(regex, __unsafe_username)
+                    if duo_search:
+                        __password = duo_search.group(1)
+                        __unsafe_username = ''
+                        break
 
         # CAUTION: We ass-u-me that nobody has a real password that is
         # among the Duo reserved words.  If they do, well... that's going
         # to be sad for them and impossible to diagnose, but this should
         # never happen in this day and age of complex passwords.
-        if __password in self.__class__.DUO_RESERVED_WORDS:
-            # Their 'password' was one of the Duo reserved words.
-            # Cite: https://duo.com/docs/authapi#auth
-            # We can't accept bareword 'passcode' because, well,
-            # they would have to send a passcode.  XXXXXX code, and literal
-            # 'passcode:XXXXXX' is accepted in the ELSE below.
-            #
-            # Set their 2nd factor to be what they asked for...
-            __factor = __password
-            # ... set passcode to None, since they didn't provide one
-            __passcode = None
-            # ... and null out 'their password'.
-            __password = None
+        for regex in self.__class__.DUO_RESERVED_REGEXPS:
+            duo_search = re.search(regex, __password)
+            if duo_search:
+                # Their 'password' was one of the Duo reserved words.
+                # Cite: https://duo.com/docs/authapi#auth
+                # We can't accept bareword 'passcode' because, well,
+                # they would have to send a passcode.  XXXXXX code, and literal
+                # 'passcode:XXXXXX' is accepted in the ELSE below.
+                #
+                # Set their 2nd factor to be what they asked for...
+                __factor = duo_search.group(1)
+                # ... set passcode to None, since they didn't provide one
+                __passcode = None
+                # ... and null out 'their password'.
+                __password = None
+                break
         else:
             # Handle various forms of passcodes, but also possibly
             # a non-MFA user's password.

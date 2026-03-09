@@ -55,7 +55,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         os.environ['untrusted_ip'] = 'testing-ip-Unknown-is-OK'
         os.environ['common_name'] = self.normal_user
         user_creds = {}
-        for varname in OpenVPNCredentials.DUO_RESERVED_WORDS:
+        for varname in OpenVPNCredentials._DUO_RESERVED_WORDS:
             os.environ['password'] = varname
             res = OpenVPNCredentials()
             res.load_variables_from_environment()

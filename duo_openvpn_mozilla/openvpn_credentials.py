@@ -36,6 +36,7 @@ class OpenVPNCredentials:
         checks on the data for sanity.
     """
 
+    _DUO_RESERVED_WORDS = set(['auto', 'push', 'sms', 'phone'])
     DUO_RESERVED_WORDS = set(['auto', 'push', 'sms', 'phone'])
     # Cite: https://duo.com/docs/authapi#auth
     # These are the reserved words that are 'factor's by which Duo

@@ -149,14 +149,14 @@ class X4LoadEnvNormal(CredentialsTestMixin, unittest.TestCase):
 # +-----------------------+------+---------------------+-----------------+
 # | vPass         User>   |  ''  | _DUO_RESERVED_WORDS | anything else   |
 # +-----------------------+------+---------------------+-----------------+
-# |  ''                   |  00  |          10         |       20        |
-# | _DUO_RESERVED_WORDS   |  01  |          11         |       21        |
-# | a_passcode            |  02  |          12         |       22        |
-# | 'passcode:'a_passcode |  03  |          13         |       23        |
-# | 'passcode:junk'       |  04  |          14         |       24        |
-# | a_password:a_passcode |  05  |          15         |       25        |
-# | some:password         |  06  |          16         |       26        |
-# | some_password         |  07  |          17         |       27        |
+# |  ''                   |  00  |          10         |       30        |
+# | _DUO_RESERVED_WORDS   |  01  |          11         |       31        |
+# | a_passcode            |  03  |          13         |       33        |
+# | 'passcode:'a_passcode |  04  |          14         |       34        |
+# | 'passcode:junk'       |  05  |          15         |       35        |
+# | a_password:a_passcode |  06  |          16         |       36        |
+# | some:password         |  07  |          17         |       37        |
+# | some_password         |  08  |          18         |       38        |
 # +-----------------------+------+---------------------+-----------------+
 
 
@@ -187,7 +187,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, None)
             self.assertEqual(self.library.factor, wordp)
 
-    def test_loadvar_02(self):
+    def test_loadvar_03(self):
         """ user '' pass a_passcode """
         _pass = self.realish_passcode
         os.environ['common_name'] = self.realish_user
@@ -200,7 +200,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_03(self):
+    def test_loadvar_04(self):
         """ user '' pass passcode:a_passcode """
         _pass = 'passcode:'+self.realish_passcode
         os.environ['common_name'] = self.realish_user
@@ -213,7 +213,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_04(self):
+    def test_loadvar_05(self):
         """ user '' pass passcode:not_a_passcode """
         _pass = 'passcode:'+self.bad_passcode
         os.environ['common_name'] = self.realish_user
@@ -227,7 +227,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.bad_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_05(self):
+    def test_loadvar_06(self):
         """ user '' pass a_password:a_passcode """
         _rawpass = 'somepass'
         _pass = _rawpass+':'+self.realish_passcode
@@ -241,7 +241,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_06(self):
+    def test_loadvar_07(self):
         """ user '' pass a_pa:ss:wo:rd """
         _pass = 'some:password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
@@ -254,7 +254,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, None)
         self.assertEqual(self.library.factor, None)
 
-    def test_loadvar_07(self):
+    def test_loadvar_08(self):
         """ user '' pass a_password """
         _pass = 'some_password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
@@ -299,7 +299,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
                 self.assertEqual(self.library.passcode, None)
                 self.assertEqual(self.library.factor, wordp)
 
-    def test_loadvar_12(self):
+    def test_loadvar_13(self):
         """ user _DUO_RESERVED_WORDS pass a_passcode """
         _pass = self.realish_passcode
         for wordu in list(self.library._DUO_RESERVED_WORDS):
@@ -313,7 +313,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, self.realish_passcode)
             self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_13(self):
+    def test_loadvar_14(self):
         """ user _DUO_RESERVED_WORDS pass passcode:a_passcode """
         _pass = 'passcode:'+self.realish_passcode
         for wordu in list(self.library._DUO_RESERVED_WORDS):
@@ -327,7 +327,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, self.realish_passcode)
             self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_14(self):
+    def test_loadvar_15(self):
         """ user _DUO_RESERVED_WORDS pass passcode:not_a_passcode """
         _pass = 'passcode:'+self.bad_passcode
         for wordu in list(self.library._DUO_RESERVED_WORDS):
@@ -342,7 +342,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, self.bad_passcode)
             self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_15(self):
+    def test_loadvar_16(self):
         """ user _DUO_RESERVED_WORDS pass a_password:a_passcode """
         _rawpass = 'somepass'
         _pass = _rawpass+':'+self.realish_passcode
@@ -357,7 +357,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, self.realish_passcode)
             self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_16(self):
+    def test_loadvar_17(self):
         """ user _DUO_RESERVED_WORDS pass a_pa:ss:wo:rd """
         _pass = 'some:password'  # nosec hardcoded_password_string
         for wordu in list(self.library._DUO_RESERVED_WORDS):
@@ -371,7 +371,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, None)
             self.assertEqual(self.library.factor, None)
 
-    def test_loadvar_17(self):
+    def test_loadvar_18(self):
         """ user _DUO_RESERVED_WORDS pass a_password """
         _pass = 'some_password'  # nosec hardcoded_password_string
         for wordu in list(self.library._DUO_RESERVED_WORDS):
@@ -388,9 +388,9 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     ############################################################################3
 
 
-class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
+class X8LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
     """ A suite of tests where we have some misc username """
-    def test_loadvar_20(self):
+    def test_loadvar_30(self):
         """ user someuser pass '' """
         # This case is somewhat of a don't-care, and you may change this
         # test case in the future.  What this simulates is, someone typed
@@ -418,7 +418,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, None)
             self.assertEqual(self.library.factor, None)
 
-    def test_loadvar_21(self):
+    def test_loadvar_31(self):
         """ user someuser pass _DUO_RESERVED_WORDS """
         for wordp in list(self.library._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
@@ -431,7 +431,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.passcode, None)
             self.assertEqual(self.library.factor, wordp)
 
-    def test_loadvar_22(self):
+    def test_loadvar_33(self):
         """ user someuser pass a_passcode """
         _pass = self.realish_passcode
         os.environ['common_name'] = self.realish_user
@@ -444,7 +444,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_23(self):
+    def test_loadvar_34(self):
         """ user someuser pass passcode:a_passcode """
         _pass = 'passcode:'+self.realish_passcode
         os.environ['common_name'] = self.realish_user
@@ -457,7 +457,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_24(self):
+    def test_loadvar_35(self):
         """ user someuser pass passcode:not_a_passcode """
         _pass = 'passcode:'+self.bad_passcode
         os.environ['common_name'] = self.realish_user
@@ -471,7 +471,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.bad_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_25(self):
+    def test_loadvar_36(self):
         """ user someuser pass a_password:a_passcode """
         _rawpass = 'somepass'
         _pass = _rawpass+':'+self.realish_passcode
@@ -485,7 +485,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, self.realish_passcode)
         self.assertEqual(self.library.factor, 'passcode')
 
-    def test_loadvar_26(self):
+    def test_loadvar_37(self):
         """ user someuser pass a_pa:ss:wo:rd """
         _pass = 'some:password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user
@@ -498,7 +498,7 @@ class X7LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
         self.assertEqual(self.library.passcode, None)
         self.assertEqual(self.library.factor, None)
 
-    def test_loadvar_27(self):
+    def test_loadvar_38(self):
         """ user someuser pass a_password """
         _pass = 'some_password'  # nosec hardcoded_password_string
         os.environ['common_name'] = self.realish_user

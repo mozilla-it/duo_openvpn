@@ -390,7 +390,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
 
 class X8LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
     """ A suite of tests where we have some misc username """
-    def test_loadvar_30(self):
+    def test_loadvar_30a(self):
         """ user someuser pass '' """
         # This case is somewhat of a don't-care, and you may change this
         # test case in the future.  What this simulates is, someone typed
@@ -417,6 +417,30 @@ class X8LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
             self.assertEqual(self.library.password, '')
             self.assertEqual(self.library.passcode, None)
             self.assertEqual(self.library.factor, None)
+
+    def test_loadvar_30b(self):
+        """ user passcode pass '' """
+        # This case is somewhat of a don't-care, and you may change this
+        # test case in the future.  What this simulates is, someone typed
+        # in a passcode in the user field, and left password blank.
+        #
+        # This is a "did we swap fields?" test
+        os.environ['common_name'] = self.realish_user
+        os.environ['username'] = '123456'
+        os.environ['password'] = ''  # nosec hardcoded_password_string
+        try:
+            self.library.load_variables_from_environment()
+        except ValueError:  # pragma: no cover
+            # If we error'ed, that's fine.
+            self.assertFalse(self.library.is_valid(),
+                             'object.is_valid must be false if load fails')
+        else:  # pragma: no cover
+            # If we loaded, we need to check this out:
+            self.assertTrue(self.library.is_valid())
+            self.assertEqual(self.library.username, self.realish_user)
+            self.assertEqual(self.library.password, None)
+            self.assertEqual(self.library.passcode, '123456')
+            self.assertEqual(self.library.factor, 'passcode')
 
     def test_loadvar_31(self):
         """ user someuser pass _DUO_RESERVED_WORDS """

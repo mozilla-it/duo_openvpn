@@ -6,6 +6,7 @@
 
 import unittest
 import os
+import test
 import test.context  # pylint: disable=unused-import
 from duo_openvpn_mozilla.openvpn_credentials import OpenVPNCredentials
 
@@ -177,7 +178,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_01(self):
         """ user '' pass _DUO_RESERVED_WORDS """
-        for wordp in list(self.library._DUO_RESERVED_WORDS):
+        for wordp in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = ''
             os.environ['password'] = wordp
@@ -190,7 +191,7 @@ class X5LoadEnvNullUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_02(self):
         """ user '' pass _DUO_RESERVED_WORDS1 """
-        for wordp in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordp in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = ''
             os.environ['password'] = f'{wordp}1'
@@ -288,7 +289,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     """ A suite of tests where we have a _DUO_RESERVED_WORDS username """
     def test_loadvar_10(self):
         """ user _DUO_RESERVED_WORDS pass '' """
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = ''  # nosec hardcoded_password_string
@@ -301,8 +302,8 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_11(self):
         """ user _DUO_RESERVED_WORDS pass _DUO_RESERVED_WORDS """
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
-            for wordp in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
+            for wordp in list(test._DUO_RESERVED_WORDS):
                 os.environ['common_name'] = self.realish_user
                 os.environ['username'] = wordu
                 os.environ['password'] = wordp
@@ -315,8 +316,8 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_12(self):
         """ user _DUO_RESERVED_WORDS pass _DUO_RESERVED_WORDS1 """
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
-            for wordp in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS):
+            for wordp in list(test._DUO_RESERVED_WORDS_INDEXABLE):
                 os.environ['common_name'] = self.realish_user
                 os.environ['username'] = wordu
                 os.environ['password'] = f'{wordp}1'
@@ -330,7 +331,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_13(self):
         """ user _DUO_RESERVED_WORDS pass a_passcode """
         _pass = self.realish_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = _pass
@@ -344,7 +345,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_14(self):
         """ user _DUO_RESERVED_WORDS pass passcode:a_passcode """
         _pass = 'passcode:'+self.realish_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = _pass
@@ -358,7 +359,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_15(self):
         """ user _DUO_RESERVED_WORDS pass passcode:not_a_passcode """
         _pass = 'passcode:'+self.bad_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = _pass
@@ -374,7 +375,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
         """ user _DUO_RESERVED_WORDS pass a_password:a_passcode """
         _rawpass = 'somepass'
         _pass = _rawpass+':'+self.realish_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = _pass
@@ -388,7 +389,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_17(self):
         """ user _DUO_RESERVED_WORDS pass a_pa:ss:wo:rd """
         _pass = 'some:password'  # nosec hardcoded_password_string
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = _pass
@@ -402,7 +403,7 @@ class X6LoadEnvDuoUser(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_18(self):
         """ user _DUO_RESERVED_WORDS pass a_password """
         _pass = 'some_password'  # nosec hardcoded_password_string
-        for wordu in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = wordu
             os.environ['password'] = _pass
@@ -420,7 +421,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
     """ A suite of tests where we have a _DUO_RESERVED_WORDS1 username """
     def test_loadvar_20(self):
         """ user _DUO_RESERVED_WORDS pass '' """
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = ''  # nosec hardcoded_password_string
@@ -433,8 +434,8 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_21(self):
         """ user _DUO_RESERVED_WORDS1 pass _DUO_RESERVED_WORDS """
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
-            for wordp in list(self.library._DUO_RESERVED_WORDS):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
+            for wordp in list(test._DUO_RESERVED_WORDS):
                 os.environ['common_name'] = self.realish_user
                 os.environ['username'] = f'{wordu}1'
                 os.environ['password'] = wordp
@@ -447,8 +448,8 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_22(self):
         """ user _DUO_RESERVED_WORDS1 pass _DUO_RESERVED_WORDS1 """
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
-            for wordp in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
+            for wordp in list(test._DUO_RESERVED_WORDS_INDEXABLE):
                 os.environ['common_name'] = self.realish_user
                 os.environ['username'] = f'{wordu}1'
                 os.environ['password'] = f'{wordp}1'
@@ -462,7 +463,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_23(self):
         """ user _DUO_RESERVED_WORDS1 pass a_passcode """
         _pass = self.realish_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = _pass
@@ -476,7 +477,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_24(self):
         """ user _DUO_RESERVED_WORDS1 pass passcode:a_passcode """
         _pass = 'passcode:'+self.realish_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = _pass
@@ -490,7 +491,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_25(self):
         """ user _DUO_RESERVED_WORDS1 pass passcode:not_a_passcode """
         _pass = 'passcode:'+self.bad_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = _pass
@@ -506,7 +507,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
         """ user _DUO_RESERVED_WORDS1 pass a_password:a_passcode """
         _rawpass = 'somepass'
         _pass = _rawpass+':'+self.realish_passcode
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = _pass
@@ -520,7 +521,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_27(self):
         """ user _DUO_RESERVED_WORDS1 pass a_pa:ss:wo:rd """
         _pass = 'some:password'  # nosec hardcoded_password_string
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = _pass
@@ -534,7 +535,7 @@ class X7LoadEnvDuo1User(CredentialsTestMixin, unittest.TestCase):
     def test_loadvar_28(self):
         """ user _DUO_RESERVED_WORDS1 pass a_password """
         _pass = 'some_password'  # nosec hardcoded_password_string
-        for wordu in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordu in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = f'{wordu}1'
             os.environ['password'] = _pass
@@ -604,7 +605,7 @@ class X8LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_31(self):
         """ user someuser pass _DUO_RESERVED_WORDS """
-        for wordp in list(self.library._DUO_RESERVED_WORDS):
+        for wordp in list(test._DUO_RESERVED_WORDS):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = 'someuser'
             os.environ['password'] = wordp
@@ -617,7 +618,7 @@ class X8LoadEnvSomewordUser(CredentialsTestMixin, unittest.TestCase):
 
     def test_loadvar_32(self):
         """ user someuser pass _DUO_RESERVED_WORDS1 """
-        for wordp in list(self.library._DUO_RESERVED_WORDS_INDEXABLE):
+        for wordp in list(test._DUO_RESERVED_WORDS_INDEXABLE):
             os.environ['common_name'] = self.realish_user
             os.environ['username'] = 'someuser'
             os.environ['password'] = f'{wordp}1'

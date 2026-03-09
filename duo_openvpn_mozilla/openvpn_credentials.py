@@ -37,8 +37,6 @@ class OpenVPNCredentials:
         checks on the data for sanity.
     """
 
-    _DUO_RESERVED_WORDS = set(['auto', 'push', 'sms', 'phone'])
-    _DUO_RESERVED_WORDS_INDEXABLE = set(['push', 'sms', 'phone'])
     DUO_RESERVED_REGEXPS = set([r'^(auto)$',
                                 r'^(push)(?:\d+)?$',
                                 r'^(sms)(?:\d+)?$',

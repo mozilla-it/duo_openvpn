@@ -62,7 +62,8 @@ class TestDuoAPIAuth(unittest.TestCase):
             user_creds[varname] = res
         self.user_data = user_creds
         #
-        self.library = DuoAPIAuth(**self.main_object.duo_client_args)
+        self.library = DuoAPIAuth(proxy_config=self.main_object.proxy_config,
+                                  **self.main_object.duo_client_args)
 
     def tearDown(self):
         """ Clear the env so we don't impact other tests """
@@ -93,6 +94,7 @@ class TestDuoAPIAuth(unittest.TestCase):
     def test_fail_open_01(self):
         """ _fail_open performs as expected on a True """
         tmplibrary = DuoAPIAuth(fail_open=True,
+                                proxy_config=self.main_object.proxy_config,
                                 **self.main_object.duo_client_args)
         res = tmplibrary._fail_open
         self.assertIsInstance(res, bool, '_fail_open must return a bool')
@@ -101,6 +103,7 @@ class TestDuoAPIAuth(unittest.TestCase):
     def test_fail_open_02(self):
         """ _fail_open performs as expected on a False """
         tmplibrary = DuoAPIAuth(fail_open=False,
+                                proxy_config=self.main_object.proxy_config,
                                 **self.main_object.duo_client_args)
         res = tmplibrary._fail_open
         self.assertIsInstance(res, bool, '_fail_open must return a bool')
@@ -144,7 +147,8 @@ class TestDuoAPIAuth(unittest.TestCase):
         if not self.deep_test_rawauth:  # pragma: no cover
             self.skipTest('because of .deep_testing preference')
         self.main_object.duo_client_args['skey'] = 'wrong-passcode'
-        tmplibrary = DuoAPIAuth(**self.main_object.duo_client_args)
+        tmplibrary = DuoAPIAuth(proxy_config=self.main_object.proxy_config,
+                                **self.main_object.duo_client_args)
         # No user data needs to be loaded to be preflighted
         res = tmplibrary._preflight()
         self.assertFalse(res, '_preflight must be False for a bad skey')
@@ -469,6 +473,7 @@ class TestDuoAPIAuth(unittest.TestCase):
         # There is no raise or return.  We're just poking at
         # the function and making sure it doesn't raise.
         tmplibrary = DuoAPIAuth(log_func=self.main_object.log,
+                                proxy_config=self.main_object.proxy_config,
                                 **self.main_object.duo_client_args)
         tmplibrary.log(summary='TEST message',
                        severity='DEBUG',
